@@ -84,12 +84,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- SPRING AI -->
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-model-ollama</artifactId>
-        </dependency>
-
+        
         <!-- TEST -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
