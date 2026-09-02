@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Login to SBMP - Smart Business Management Platform">
+  <title>Login - SBMP</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+        --primary-blue: #3B82F6;
+        --primary-blue-light: #60A5FA;
+        --primary-blue-dark: #2563EB;
+        --secondary-blue: #0EA5E9;
+        --accent-cyan: #06B6D4;
+        --accent-green: #10B981;
+        --accent-green-light: #34D399;
+        --accent-green-dark: #059669;
+        --text-dark: #0F172A;
+        --text-muted: #64748B;
+        --bg-light: #F8FAFC;
+        --bg-white: #FFFFFF;
+        --border-light: #E2E8F0;
+        --success-green: #10B981;
+        --error-red: #EF4444;
+        --shadow-sm: 0 2px 8px rgba(59, 130, 246, 0.08);
+        --shadow-md: 0 4px 24px rgba(59, 130, 246, 0.12);
+        --shadow-lg: 0 8px 40px rgba(59, 130, 246, 0.16);
+        --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+        --gradient-light: linear-gradient(135deg, #EFF6FF 0%, #ECFDF5 100%);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html, body {
+        height: 100%;
+    }
+
+    body {
+        font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--text-dark);
+        line-height: 1.6;
+        background: var(--bg-white);
+        overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    .auth-shell {
+        min-height: 100vh;
+        display: flex;
+    }
+
+    .auth-brand-panel {
+        flex: 1 1 50%;
+        position: relative;
+        background: linear-gradient(150deg, #1E3A8A 0%, #2563EB 45%, #059669 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 3rem 3.5rem;
+        overflow: hidden;
+        color: white;
+    }
+
+    .auth-brand-panel::before {
+        content: '';
+        position: absolute;
+        top: -20%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: floatBlob 10s ease-in-out infinite;
+    }
+
+    .auth-brand-panel::after {
+        content: '';
+        position: absolute;
+        bottom: -25%;
+        left: -15%;
+        width: 460px;
+        height: 460px;
+        background: radial-gradient(circle, rgba(16,185,129,0.25) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: floatBlob 12s ease-in-out infinite reverse;
+    }
+
+    @keyframes floatBlob {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(-20px, 20px) scale(1.08); }
+    }
+
+    .brand-panel-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .brand-panel-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin-bottom: 4rem;
+    }
+
+    .brand-panel-logo .logo-icon {
+        width: 42px;
+        height: 42px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+    }
+
+    .brand-panel-heading {
+        font-size: 2.4rem;
+        line-height: 1.2;
+        margin-bottom: 1rem;
+        max-width: 480px;
+        color: white;
+    }
+
+    .brand-panel-sub {
+        font-size: 1.05rem;
+        color: rgba(255,255,255,0.85);
+        max-width: 440px;
+        margin-bottom: 3rem;
+    }
+
+    .brand-feature-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 1.1rem;
+    }
+
+    .brand-feature-list li {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        font-size: 0.98rem;
+        color: rgba(255,255,255,0.92);
+    }
+
+    .brand-feature-list .feat-icon {
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+        background: rgba(255,255,255,0.16);
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    .brand-panel-footer {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 16px;
+        padding: 1.1rem 1.3rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .brand-panel-footer .quote-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .brand-panel-footer p {
+        font-size: 0.88rem;
+        color: rgba(255,255,255,0.9);
+        margin: 0;
+        font-style: italic;
+    }
+
+    .brand-panel-footer .quote-name {
+        font-size: 0.8rem;
+        font-style: normal;
+        font-weight: 700;
+        color: white;
+        margin-top: 0.2rem;
+    }
+
+    .auth-form-panel {
+        flex: 1 1 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 2rem;
+        background: var(--bg-white);
+        position: relative;
+    }
+
+    .auth-container {
+        width: 100%;
+        max-width: 420px;
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(24px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .mobile-brand-logo {
+        display: none;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .mobile-brand-logo .brand-name {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.5px;
+    }
+
+    .auth-header {
+        margin-bottom: 2.2rem;
+    }
+
+    .auth-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: var(--gradient-light);
+        color: var(--primary-blue-dark);
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 0.35rem 0.9rem;
+        border-radius: 20px;
+        margin-bottom: 1.1rem;
+    }
+
+    .auth-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.5px;
+    }
+
+    .auth-subtitle {
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.4rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        font-size: 0.88rem;
+        display: block;
+    }
+
+    .form-control {
+        border: 2px solid var(--border-light);
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: var(--bg-white);
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .form-control.is-invalid {
+        border-color: var(--error-red);
+    }
+
+    .form-control.is-invalid:focus {
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+    }
+
+    .form-control.is-valid {
+        border-color: var(--success-green);
+    }
+
+    .form-control.is-valid:focus {
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+
+    .invalid-feedback,
+    .valid-feedback {
+        font-size: 0.82rem;
+        margin-top: 0.4rem;
+        display: none;
+    }
+
+    .form-control.is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+
+    .password-wrapper {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0.25rem;
+        transition: color 0.3s ease;
+    }
+
+    .password-toggle:hover {
+        color: var(--primary-blue);
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+    }
+
+    .form-check-input {
+        width: 1.15rem;
+        height: 1.15rem;
+        border: 2px solid var(--border-light);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+
+    .form-check-input:focus {
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-check-label {
+        margin-left: 0.5rem;
+        cursor: pointer;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+
+    .forgot-password {
+        color: var(--primary-blue);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.88rem;
+        transition: color 0.3s ease;
+    }
+
+    .forgot-password:hover {
+        color: var(--primary-blue-dark);
+        text-decoration: underline;
+    }
+
+    .btn-auth {
+        width: 100%;
+        padding: 0.95rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        border: none;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary-auth {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary-auth:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-primary-auth:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    .btn-primary-auth:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-loading {
+        position: relative;
+        color: transparent;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .btn-secondary-auth {
+        background: transparent;
+        color: var(--primary-blue);
+        border: 2px solid var(--primary-blue);
+        margin-top: 0.9rem;
+    }
+
+    .btn-secondary-auth:hover {
+        background: var(--primary-blue);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 1.7rem 0;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .divider span {
+        padding: 0 1rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 1.8rem;
+        padding-top: 1.6rem;
+        border-top: 1px solid var(--border-light);
+    }
+
+    .auth-footer p {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .auth-footer a {
+        color: var(--primary-blue);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .back-home {
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+
+    .back-home a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.88rem;
+        transition: color 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .back-home a:hover {
+        color: var(--primary-blue);
+    }
+
+    .back-home i {
+        margin-right: 0.4rem;
+    }
+
+    .input-icon-wrapper {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 1.05rem;
+    }
+
+    .input-icon-wrapper .form-control {
+        padding-left: 2.7rem;
+    }
+
+    @media (max-width: 992px) {
+        .auth-brand-panel {
+            display: none;
+        }
+
+        .auth-form-panel {
+            flex: 1 1 100%;
+        }
+
+        .mobile-brand-logo {
+            display: block;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .auth-form-panel {
+            padding: 2rem 1.25rem;
+        }
+
+        .auth-title {
+            font-size: 1.6rem;
+        }
+    }
+  </style>
+</head>
+<body>
+
+<div class="auth-shell">
+
+  <!-- Left Branding Panel -->
+  <div class="auth-brand-panel">
+    <div class="brand-panel-content">
+      <div class="brand-panel-logo">
+        <span class="logo-icon"><i class="bi bi-boxes"></i></span>
+        SBMP
+      </div>
+
+      <h1 class="brand-panel-heading">Run your entire business, from stock to profit.</h1>
+      <p class="brand-panel-sub">Sign in to manage products, purchases, suppliers, sales and profit &mdash; all from one smart dashboard.</p>
+
+      <ul class="brand-feature-list">
+        <li><span class="feat-icon"><i class="bi bi-boxes"></i></span> Real-time stock &amp; inventory tracking</li>
+        <li><span class="feat-icon"><i class="bi bi-truck"></i></span> Purchase &amp; supplier management</li>
+        <li><span class="feat-icon"><i class="bi bi-graph-up"></i></span> Sales dashboard with live insights</li>
+        <li><span class="feat-icon"><i class="bi bi-pie-chart"></i></span> Automated profit reports</li>
+      </ul>
+    </div>
+
+    <div class="brand-panel-footer">
+      <div class="quote-avatar">R</div>
+      <div>
+        <p>"SBMP made it so much easier to track our stock and never run out of products."</p>
+        <div class="quote-name">Rahim Ahmed &mdash; Retail Store Owner</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Form Panel -->
+  <div class="auth-form-panel">
+    <div class="auth-container">
+
+      <div class="mobile-brand-logo">
+        <h1 class="brand-name"><i class="bi bi-boxes me-2"></i>SBMP</h1>
+      </div>
+
+      <div class="auth-header">
+        <span class="auth-badge"><i class="bi bi-shield-check"></i> Secure login</span>
+        <h2 class="auth-title">Welcome back</h2>
+        <p class="auth-subtitle">Sign in to your account to continue</p>
+      </div>
+
+      <form
+              id="loginForm"
+              th:action="@{/login}"
+              method="post"
+              novalidate
+      >
+        <div class="form-group">
+          <label for="emailPhone" class="form-label">Email or Phone Number</label>
+          <div class="input-icon-wrapper">
+            <i class="bi bi-envelope input-icon"></i>
+            <input
+                    type="text"
+                    class="form-control"
+                    id="emailPhone"
+                    name="username"
+                    placeholder="Enter your email or phone number"
+                    required
+            >
+          </div>
+          <div class="invalid-feedback">
+            Please enter a valid email or phone number
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <div class="input-icon-wrapper password-wrapper">
+            <i class="bi bi-lock input-icon"></i>
+            <input
+                    type="password"
+                    class="form-control"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    required
+                    minlength="6"
+            >
+            <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility">
+              <i class="bi bi-eye" id="toggleIcon"></i>
+            </button>
+          </div>
+          <div class="invalid-feedback">
+            Password must be at least 6 characters
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe">
+            <label class="form-check-label" for="rememberMe">
+              Remember me
+            </label>
+          </div>
+          <a href="#forgot-password" class="forgot-password">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary-auth btn-auth" id="loginBtn">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+        </button>
+
+        <div class="divider">
+          <span>or</span>
+        </div>
+
+        <button type="button" class="btn btn-secondary-auth btn-auth" onclick="window.location.href='/register'">
+          <i class="bi bi-person-plus me-2"></i>Create New Account
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Don't have an account? <a href="/register">Sign up now</a></p>
+      </div>
+
+      <div class="back-home">
+        <a href="/">
+          <i class="bi bi-arrow-left"></i>Back to Home
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('password');
+  const toggleIcon = document.getElementById('toggleIcon');
+
+  togglePassword.addEventListener('click', function() {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+
+      if (type === 'password') {
+          toggleIcon.classList.remove('bi-eye-slash');
+          toggleIcon.classList.add('bi-eye');
+      } else {
+          toggleIcon.classList.remove('bi-eye');
+          toggleIcon.classList.add('bi-eye-slash');
+      }
+  });
+
+  const loginForm = document.getElementById('loginForm');
+  const emailPhoneInput = document.getElementById('emailPhone');
+  const passwordInputField = document.getElementById('password');
+  const loginBtn = document.getElementById('loginBtn');
+
+  function validateEmailPhone(value) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
+      return emailRegex.test(value) || phoneRegex.test(value);
+  }
+
+  emailPhoneInput.addEventListener('blur', function() {
+      if (this.value.trim() === '') {
+          this.classList.remove('is-valid', 'is-invalid');
+      } else if (validateEmailPhone(this.value)) {
+          this.classList.remove('is-invalid');
+          this.classList.add('is-valid');
+      } else {
+          this.classList.remove('is-valid');
+          this.classList.add('is-invalid');
+      }
+  });
+
+  passwordInputField.addEventListener('blur', function() {
+      if (this.value.trim() === '') {
+          this.classList.remove('is-valid', 'is-invalid');
+      } else if (this.value.length >= 6) {
+          this.classList.remove('is-invalid');
+          this.classList.add('is-valid');
+      } else {
+          this.classList.remove('is-valid');
+          this.classList.add('is-invalid');
+      }
+  });
+
+  loginForm.addEventListener('submit', function(e) {
+      let isValid = true;
+
+      if (!validateEmailPhone(emailPhoneInput.value)) {
+          emailPhoneInput.classList.add('is-invalid');
+          emailPhoneInput.classList.remove('is-valid');
+          isValid = false;
+      } else {
+          emailPhoneInput.classList.remove('is-invalid');
+          emailPhoneInput.classList.add('is-valid');
+      }
+
+      if (passwordInputField.value.length < 6) {
+          passwordInputField.classList.add('is-invalid');
+          passwordInputField.classList.remove('is-valid');
+          isValid = false;
+      } else {
+          passwordInputField.classList.remove('is-invalid');
+          passwordInputField.classList.add('is-valid');
+      }
+
+      if (isValid) {
+          loginBtn.classList.add('btn-loading');
+          loginBtn.disabled = true;
+      }
+  });
+
+  emailPhoneInput.addEventListener('input', function() {
+      if (this.classList.contains('is-invalid') || this.classList.contains('is-valid')) {
+          this.classList.remove('is-invalid', 'is-valid');
+      }
+  });
+
+  passwordInputField.addEventListener('input', function() {
+      if (this.classList.contains('is-invalid') || this.classList.contains('is-valid')) {
+          this.classList.remove('is-invalid', 'is-valid');
+      }
+  });
+</script>
+
+</body>
+</html>
+

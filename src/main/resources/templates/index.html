@@ -1,0 +1,2773 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart Business Management Platform (SBMP) - Business stock management platform for inventory, purchase, sales, and profit analytics">
+    <meta name="keywords" content="stock management, inventory software, purchase management, sales tracking, profit report, SBMP">
+    <title>SBMP - Smart Business Management Platform</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-blue: #3B82F6;
+            --primary-blue-light: #60A5FA;
+            --primary-blue-dark: #2563EB;
+            --secondary-blue: #0EA5E9;
+            --accent-cyan: #06B6D4;
+            --accent-green: #10B981;
+            --accent-green-light: #34D399;
+            --accent-green-dark: #059669;
+            --text-dark: #0F172A;
+            --text-muted: #64748B;
+            --bg-light: #F8FAFC;
+            --bg-white: #FFFFFF;
+            --border-light: #E2E8F0;
+            --shadow-sm: 0 2px 8px rgba(59, 130, 246, 0.08);
+            --shadow-md: 0 4px 24px rgba(59, 130, 246, 0.12);
+            --shadow-lg: 0 8px 40px rgba(59, 130, 246, 0.16);
+            --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+            --gradient-light: linear-gradient(135deg, #EFF6FF 0%, #ECFDF5 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.7;
+            background-color: var(--bg-white);
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--text-dark);
+        }
+
+        /* Navbar Styles */
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            padding: 1rem 0;
+        }
+
+        .navbar-custom.scrolled {
+            box-shadow: var(--shadow-md);
+        }
+
+        .navbar-brand {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-link {
+            color: var(--text-dark);
+            font-weight: 500;
+            margin: 0 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-blue);
+        }
+
+        .btn-login {
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+
+        .btn-login:hover {
+            background: var(--primary-blue);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-register {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 50%, #F0F9FF 100%);
+            padding: 40px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-title {
+            font-size: 4.25rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.08;
+            letter-spacing: -1.5px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            line-height: 1.8;
+        }
+
+        .btn-hero {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .btn-hero-primary {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-hero-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-hero-secondary {
+            background: white;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+        }
+
+        .btn-hero-secondary:hover {
+            background: var(--primary-blue);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .hero-image {
+            position: relative;
+            animation: fadeInRight 1s ease-out;
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .dashboard-mockup {
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            background: white;
+            padding: 1rem;
+        }
+
+        .mockup-header {
+            background: var(--gradient-light);
+            height: 40px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+        }
+
+        .mockup-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .mockup-body {
+            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+            height: 300px;
+            border-radius: 0 0 8px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mockup-body::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--primary-blue-light) 2px, transparent 2px);
+            background-size: 30px 30px;
+            opacity: 0.1;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-50%, -50%); }
+        }
+
+        /* Section Styles */
+        section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-size: 2.9rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 4rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Marquee Section */
+        .marquee-outer {
+            padding: 100px 0 0;
+            background: var(--bg-white);
+        }
+
+        .marquee-section {
+            background: var(--text-dark);
+            border-radius: 50px;
+            padding: 14px 0;
+            overflow: hidden;
+            position: relative;
+            box-shadow: var(--shadow-md);
+        }
+
+        .marquee-section::before,
+        .marquee-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 60px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .marquee-section::before {
+            left: 0;
+            background: linear-gradient(90deg, var(--text-dark) 0%, transparent 100%);
+        }
+
+        .marquee-section::after {
+            right: 0;
+            background: linear-gradient(270deg, var(--text-dark) 0%, transparent 100%);
+        }
+
+        .marquee-track {
+            display: flex;
+            width: max-content;
+            animation: marquee-scroll 24s linear infinite;
+        }
+
+        .marquee-track:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes marquee-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .marquee-item {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+            padding: 0 1.5rem;
+            opacity: 0.9;
+        }
+
+        .marquee-item i {
+            margin-right: 0.6rem;
+            font-size: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .marquee-sep {
+            color: var(--accent-green-light);
+            margin: 0 0.75rem;
+            font-size: 1rem;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .marquee-outer {
+                padding: 90px 0 0;
+            }
+
+            .marquee-section {
+                border-radius: 30px;
+            }
+
+            .marquee-item {
+                font-size: 0.9rem;
+                padding: 0 1rem;
+            }
+        }
+
+        /* Image Slider */
+        .slider-section {
+            background: var(--bg-light);
+            padding: 80px 0;
+        }
+
+        .slider-wrapper {
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .slider-track {
+            display: flex;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide {
+            min-width: 100%;
+            position: relative;
+        }
+
+        .slide svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .slide-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(0deg, rgba(15, 23, 42, 0.85) 0%, transparent 100%);
+            color: white;
+            padding: 2rem 2rem 1.5rem;
+        }
+
+        .slide-caption h4 {
+            color: white;
+            font-size: 1.4rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .slide-caption p {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--primary-blue-dark);
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            z-index: 3;
+        }
+
+        .slider-nav:hover {
+            background: var(--gradient-primary);
+            color: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .slider-prev { left: 16px; }
+        .slider-next { right: 16px; }
+
+        .slider-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 1.5rem;
+        }
+
+        .slider-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border-light);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slider-dot.active {
+            background: var(--gradient-primary);
+            width: 28px;
+            border-radius: 6px;
+        }
+
+        /* Feature Cards */
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            height: 100%;
+            border: 1px solid var(--border-light);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-blue-light);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--gradient-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.75rem;
+            color: var(--primary-blue);
+            transition: all 0.3s ease;
+        }
+
+        .feature-icon.mx-auto {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .feature-card:hover .feature-icon {
+            background: var(--gradient-primary);
+            color: white;
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .feature-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .feature-description {
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        /* Benefits Section */
+        .benefits-section {
+            background: var(--gradient-light);
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .benefit-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .benefit-content h4 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .benefit-content p {
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .benefits-visual {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 50%, #10B981 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: drift 30s linear infinite;
+        }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .cta-title {
+            font-size: 2.75rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .cta-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.95;
+        }
+
+        .btn-cta {
+            background: white;
+            color: var(--primary-blue);
+            padding: 1.2rem 3rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 12px;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--text-dark);
+            color: white;
+            padding: 3rem 0 1.5rem;
+        }
+
+        .footer-brand {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .footer-description {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+            max-width: 350px;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-blue-light);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .cta-title {
+                font-size: 2rem;
+            }
+
+            .btn-hero {
+                padding: 0.875rem 2rem;
+                font-size: 1rem;
+                display: block;
+                width: 100%;
+                margin: 0.5rem 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Utility Classes */
+        .text-gradient {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Loading Animation */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Testimonials */
+        .testimonial-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            height: 100%;
+            border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+
+        .testimonial-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-5px);
+        }
+
+        .testimonial-stars {
+            color: #F59E0B;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-text {
+            color: var(--text-dark);
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+
+        .testimonial-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .testimonial-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .testimonial-role {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Pricing */
+        .pricing-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            height: 100%;
+            border: 2px solid var(--border-light);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .pricing-card.featured {
+            border-color: var(--primary-blue);
+            box-shadow: var(--shadow-md);
+        }
+
+        .pricing-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-primary);
+            color: white;
+            padding: 0.35rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .pricing-plan-name {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-price {
+            font-size: 2.75rem;
+            font-weight: 800;
+            margin: 1rem 0;
+        }
+
+        .pricing-price span {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .pricing-features {
+            list-style: none;
+            padding: 0;
+            margin: 1.5rem 0 2rem;
+        }
+
+        .pricing-features li {
+            padding: 0.6rem 0;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .pricing-features li i {
+            color: var(--accent-green-dark);
+            margin-right: 0.5rem;
+        }
+
+        .btn-pricing {
+            width: 100%;
+            padding: 0.85rem;
+            border-radius: 10px;
+            font-weight: 600;
+            border: 2px solid var(--primary-blue);
+            background: transparent;
+            color: var(--primary-blue);
+            transition: all 0.3s ease;
+        }
+
+        .btn-pricing.featured {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-pricing:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="#"><i class="bi bi-boxes me-2"></i>SBMP</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="#features"><i class="bi bi-stars me-1"></i>Features</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#benefits"><i class="bi bi-patch-check me-1"></i>Benefits</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#pricing"><i class="bi bi-tag me-1"></i>Pricing</a>
+                </li>
+                <li class="nav-item ms-lg-3">
+                    <button class="btn btn-login"
+                            onclick="window.location.href='/login'">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                    </button>
+
+                </li>
+                <li class="nav-item ms-2">
+                    <button class="btn btn-register"
+                            onclick="window.location.href='/register'">
+                        <i class="bi bi-person-plus me-1"></i>Register
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Marquee Section -->
+<div class="marquee-outer">
+    <div class="container">
+        <div class="marquee-section">
+            <div class="marquee-track">
+                <div class="marquee-item"><i class="bi bi-box-seam"></i> Product Management <span class="marquee-sep">/</span></div>
+                <div class="marquee-item"><i class="bi bi-tags"></i> Category Management <span class="marquee-sep">/</span></div>
+                <div class="marquee-item"><i class="bi bi-boxes"></i> Stock Tracking <span class="marquee-sep">/</span></div>
+                <div class="marquee-item"><i class="bi bi-truck"></i> Purchase Management <span class="marquee-sep">/</span></div>
+                <div class="marquee-item"><i class="bi bi-people"></i> Supplier Management <span class="marquee-sep">/</span></div>
+                <div class="marquee-item"><i class="bi bi-graph-up"></i> Sales Management <span class="marquee-sep">/</span></div>
+                <div class="marquee-item"><i class="bi bi-pie-chart"></i> Profit Reports <span class="marquee-sep">/</span></div>
+                <div class="marquee-item"><i class="bi bi-shield-check"></i> Secure Access <span class="marquee-sep">/</span></div>
+                <!-- duplicate for seamless loop -->
+                <div class="marquee-item"><i class="bi bi-box-seam"></i> Product Management <span class="marquee-sep">/</span></div>
+                <div class="marquee-item"><i class="bi bi-tags"></i> Category Management <span class="marquee-sep">/</span></div>
+                <div class="marquee-item"><i class="bi bi-boxes"></i> Stock Tracking <span class="marquee-sep">/</span></div>
+                <div class="marquee-item"><i class="bi bi-truck"></i> Purchase Management <span class="marquee-sep">/</span></div>
+                <div class="marquee-item"><i class="bi bi-people"></i> Supplier Management <span class="marquee-sep">/</span></div>
+                <div class="marquee-item"><i class="bi bi-graph-up"></i> Sales Management <span class="marquee-sep">/</span></div>
+                <div class="marquee-item"><i class="bi bi-pie-chart"></i> Profit Reports <span class="marquee-sep">/</span></div>
+                <div class="marquee-item"><i class="bi bi-shield-check"></i> Secure Access <span class="marquee-sep">/</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <h1 class="hero-title">
+                    Smart Business<br>
+                    <span class="text-gradient">Management Platform</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Manage your products, categories, suppliers, purchases, stock, sales, and profit reports from one powerful platform. Built for growing businesses.
+                </p>
+                <div class="hero-buttons">
+                    <button class="btn btn-hero btn-hero-primary" onclick="window.location.href='/register'">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Start Free
+                    </button>
+                    <button class="btn btn-hero btn-hero-secondary" onclick="window.location.href='/login'">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                    </button>
+                </div>
+            </div>
+            <div class="col-lg-6 hero-image mt-5 mt-lg-0">
+                <div class="dashboard-mockup">
+                    <div class="mockup-header">
+                        <span class="mockup-dot" style="background: #FF5F57;"></span>
+                        <span class="mockup-dot" style="background: #FFBD2E;"></span>
+                        <span class="mockup-dot" style="background: #28CA42;"></span>
+                    </div>
+                    <div class="mockup-body">
+                        <div class="text-center">
+                            <i class="bi bi-boxes" style="font-size: 4rem; color: var(--accent-green-dark);"></i>
+                            <h3 class="mt-3" style="color: var(--text-dark);">Stock Dashboard</h3>
+                            <p class="text-muted">Real-time inventory &amp; stock insights</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Image Slider Section -->
+<section class="slider-section">
+    <div class="container">
+        <h2 class="section-title"><i class="bi bi-play-circle me-2" style="color: var(--primary-blue);"></i>See SBMP In Action</h2>
+        <p class="section-subtitle">A visual look at how your business flows through the platform</p>
+
+        <div class="slider-wrapper">
+            <div class="slider-track" id="sliderTrack">
+                <div class="slide">
+                    <svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#3B82F6"/>
+                                <stop offset="100%" stop-color="#10B981"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="900" height="500" fill="url(#g1)"/>
+                        <rect x="80" y="90" width="200" height="240" rx="10" fill="#ffffff" opacity="0.15"/>
+                        <rect x="80" y="90" width="200" height="240" rx="10" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.5"/>
+                        <rect x="330" y="60" width="200" height="270" rx="10" fill="#ffffff" opacity="0.22"/>
+                        <rect x="330" y="60" width="200" height="270" rx="10" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.6"/>
+                        <rect x="580" y="110" width="200" height="220" rx="10" fill="#ffffff" opacity="0.15"/>
+                        <rect x="580" y="110" width="200" height="220" rx="10" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.5"/>
+                        <circle cx="180" cy="180" r="30" fill="#ffffff" opacity="0.9"/>
+                        <rect x="150" y="230" width="60" height="10" rx="5" fill="#ffffff" opacity="0.7"/>
+                        <rect x="360" y="120" width="140" height="14" rx="7" fill="#ffffff" opacity="0.9"/>
+                        <rect x="360" y="150" width="100" height="10" rx="5" fill="#ffffff" opacity="0.6"/>
+                        <rect x="360" y="200" width="140" height="60" rx="8" fill="#ffffff" opacity="0.25"/>
+                        <rect x="610" y="150" width="140" height="14" rx="7" fill="#ffffff" opacity="0.9"/>
+                        <rect x="610" y="180" width="90" height="10" rx="5" fill="#ffffff" opacity="0.6"/>
+                        <circle cx="680" cy="250" r="35" fill="none" stroke="#ffffff" stroke-width="5" opacity="0.6"/>
+                        <path d="M680 220 L680 250 L700 260" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.9" stroke-linecap="round"/>
+                    </svg>
+                    <div class="slide-caption">
+                        <h4><i class="bi bi-boxes me-2"></i>Stock &amp; Product Overview</h4>
+                        <p>Track products, categories, and live stock levels at a glance.</p>
+                    </div>
+                </div>
+
+                <div class="slide">
+                    <svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#2563EB"/>
+                                <stop offset="100%" stop-color="#059669"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="900" height="500" fill="url(#g2)"/>
+                        <path d="M100 400 L200 260 L320 320 L470 150 L620 220 L800 90" stroke="#ffffff" stroke-width="5" fill="none" opacity="0.85" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="200" cy="260" r="8" fill="#ffffff"/>
+                        <circle cx="320" cy="320" r="8" fill="#ffffff"/>
+                        <circle cx="470" cy="150" r="8" fill="#ffffff"/>
+                        <circle cx="620" cy="220" r="8" fill="#ffffff"/>
+                        <circle cx="800" cy="90" r="10" fill="#ffffff"/>
+                        <rect x="100" y="410" width="700" height="3" fill="#ffffff" opacity="0.3"/>
+                        <rect x="140" y="60" width="180" height="70" rx="10" fill="#ffffff" opacity="0.2"/>
+                        <rect x="160" y="80" width="90" height="12" rx="6" fill="#ffffff" opacity="0.9"/>
+                        <rect x="160" y="100" width="60" height="10" rx="5" fill="#ffffff" opacity="0.6"/>
+                    </svg>
+                    <div class="slide-caption">
+                        <h4><i class="bi bi-graph-up me-2"></i>Sales &amp; Purchase Trends</h4>
+                        <p>Visualize sales performance and purchase trends over time.</p>
+                    </div>
+                </div>
+
+                <div class="slide">
+                    <svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#0EA5E9"/>
+                                <stop offset="100%" stop-color="#10B981"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="900" height="500" fill="url(#g3)"/>
+                        <rect x="140" y="280" width="90" height="120" rx="6" fill="#ffffff" opacity="0.85"/>
+                        <rect x="260" y="220" width="90" height="180" rx="6" fill="#ffffff" opacity="0.7"/>
+                        <rect x="380" y="150" width="90" height="250" rx="6" fill="#ffffff" opacity="0.9"/>
+                        <rect x="500" y="240" width="90" height="160" rx="6" fill="#ffffff" opacity="0.7"/>
+                        <rect x="620" y="190" width="90" height="210" rx="6" fill="#ffffff" opacity="0.85"/>
+                        <circle cx="425" cy="110" r="34" fill="#ffffff" opacity="0.95"/>
+                        <path d="M425 90 L425 110 L440 118" stroke="#059669" stroke-width="5" fill="none" stroke-linecap="round"/>
+                    </svg>
+                    <div class="slide-caption">
+                        <h4><i class="bi bi-pie-chart me-2"></i>Profit Report</h4>
+                        <p>Automatically compare purchases and sales to see your real profit.</p>
+                    </div>
+                </div>
+
+                <div class="slide">
+                    <svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="g4" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#3B82F6"/>
+                                <stop offset="100%" stop-color="#0EA5E9"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="900" height="500" fill="url(#g4)"/>
+                        <circle cx="450" cy="250" r="140" fill="#ffffff" opacity="0.12"/>
+                        <circle cx="450" cy="250" r="95" fill="#ffffff" opacity="0.18"/>
+                        <circle cx="450" cy="200" r="40" fill="#ffffff" opacity="0.95"/>
+                        <path d="M410 320 q40 -50 80 0 z" fill="#ffffff" opacity="0.9"/>
+                        <circle cx="260" cy="150" r="20" fill="#ffffff" opacity="0.5"/>
+                        <circle cx="640" cy="160" r="16" fill="#ffffff" opacity="0.5"/>
+                        <circle cx="230" cy="360" r="14" fill="#ffffff" opacity="0.5"/>
+                        <circle cx="670" cy="360" r="18" fill="#ffffff" opacity="0.5"/>
+                    </svg>
+                    <div class="slide-caption">
+                        <h4><i class="bi bi-people me-2"></i>Suppliers &amp; Purchase Flow</h4>
+                        <p>Manage suppliers and connect purchases directly to your stock.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="slider-nav slider-prev" onclick="moveSlide(-1)" aria-label="Previous slide">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="slider-nav slider-next" onclick="moveSlide(1)" aria-label="Next slide">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="slider-dots" id="sliderDots"></div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features">
+    <div class="container">
+        <h2 class="section-title"><i class="bi bi-stars me-2" style="color: var(--accent-green-dark);"></i>Powerful Features for Your Stock Business</h2>
+        <p class="section-subtitle">
+            Everything you need to manage products, purchases, sales, and profit in one place
+        </p>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4 fade-in-section">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <h3 class="feature-title">Product &amp; Category Management</h3>
+                    <p class="feature-description">
+                        Organize your products into categories, manage details, and keep your catalog always up to date.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 fade-in-section">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-boxes"></i>
+                    </div>
+                    <h3 class="feature-title">Stock Tracking</h3>
+                    <p class="feature-description">
+                        Monitor real-time stock levels and view complete stock history for every product, so you never run out or overstock.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 fade-in-section">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-truck"></i>
+                    </div>
+                    <h3 class="feature-title">Purchase Management</h3>
+                    <p class="feature-description">
+                        Create purchase orders, generate memos, and track incoming stock from your suppliers with a clear purchase dashboard.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 fade-in-section">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h3 class="feature-title">Supplier Management</h3>
+                    <p class="feature-description">
+                        Keep a complete record of your suppliers, view their purchase history, and manage relationships in one place.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 fade-in-section">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h3 class="feature-title">Sales Management</h3>
+                    <p class="feature-description">
+                        Record sales, view transaction history, and get a live sales dashboard for complete visibility into your revenue.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 fade-in-section">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-pie-chart"></i>
+                    </div>
+                    <h3 class="feature-title">Profit Reports</h3>
+                    <p class="feature-description">
+                        Automatically calculate and visualize profit from your purchase and sales data with detailed reports.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="how-it-works" style="background: var(--bg-light);">
+    <div class="container">
+        <h2 class="section-title"><i class="bi bi-signpost-split me-2" style="color: var(--primary-blue);"></i>How SBMP Works</h2>
+        <p class="section-subtitle">
+            From product setup to profit report — a simple, connected workflow
+        </p>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3 fade-in-section">
+                <div class="feature-card text-center">
+                    <div class="feature-icon mx-auto">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <h3 class="feature-title" style="font-size: 1.15rem;">1. Add Products</h3>
+                    <p class="feature-description">Set up categories, suppliers, and products to build your catalog.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 fade-in-section">
+                <div class="feature-card text-center">
+                    <div class="feature-icon mx-auto">
+                        <i class="bi bi-truck"></i>
+                    </div>
+                    <h3 class="feature-title" style="font-size: 1.15rem;">2. Record Purchases</h3>
+                    <p class="feature-description">Create purchase orders from suppliers and stock automatically updates.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 fade-in-section">
+                <div class="feature-card text-center">
+                    <div class="feature-icon mx-auto">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h3 class="feature-title" style="font-size: 1.15rem;">3. Track Sales</h3>
+                    <p class="feature-description">Log every sale and watch your stock levels adjust in real time.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 fade-in-section">
+                <div class="feature-card text-center">
+                    <div class="feature-icon mx-auto">
+                        <i class="bi bi-pie-chart"></i>
+                    </div>
+                    <h3 class="feature-title" style="font-size: 1.15rem;">4. View Profit</h3>
+                    <p class="feature-description">Get automatic profit reports comparing purchases against sales.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section id="benefits" class="benefits-section">
+    <div class="container">
+        <h2 class="section-title"><i class="bi bi-patch-check me-2" style="color: var(--accent-green-dark);"></i>Why Choose SBMP</h2>
+        <p class="section-subtitle">
+            Built to make stock, purchase, and sales management effortless
+        </p>
+
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="bi bi-boxes"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Real-Time Stock Visibility</h4>
+                        <p>Always know exactly what's in stock with live updates and a full stock history for every product.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Secure User Access</h4>
+                        <p>Login and registration with secure authentication keep your business data protected.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="bi bi-arrow-left-right"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Purchase-to-Sales Flow</h4>
+                        <p>Go from purchase order to stock to sale in one connected workflow, with no manual reconciliation.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="bi bi-lightning"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Fast &amp; Lightweight</h4>
+                        <p>A focused Spring Boot platform that stays quick and responsive as your product catalog grows.</p>
+                    </div>
+                </div>
+
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="bi bi-bar-chart"></i>
+                    </div>
+                    <div class="benefit-content">
+                        <h4>Profit &amp; Business Analytics</h4>
+                        <p>Automatically generated profit reports show you exactly how your business is performing.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mt-5 mt-lg-0">
+                <div class="benefits-visual">
+                    <h3 class="text-center mb-4"><i class="bi bi-house-check me-2" style="color: var(--accent-green-dark);"></i>Everything Under One Roof</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" data-count="6" data-suffix="+">0</div>
+                            <div class="stat-label"><i class="bi bi-grid-3x3-gap me-1"></i>Core Modules</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" data-count="100" data-suffix="%">0</div>
+                            <div class="stat-label"><i class="bi bi-eye me-1"></i>Stock Visibility</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" data-static="24/7">24/7</div>
+                            <div class="stat-label"><i class="bi bi-clock-history me-1"></i>Access Anytime</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" data-count="1" data-suffix="">0</div>
+                            <div class="stat-label"><i class="bi bi-layers me-1"></i>Unified Platform</div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-5">
+                        <i class="bi bi-award" style="font-size: 4rem; color: var(--accent-green-dark);"></i>
+                        <h4 class="mt-3">Built for Growing Businesses</h4>
+                        <p class="text-muted">From products to profit, all in one platform</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section id="testimonials">
+    <div class="container">
+        <h2 class="section-title"><i class="bi bi-chat-quote me-2" style="color: var(--primary-blue);"></i>What Our Users Say</h2>
+        <p class="section-subtitle">Real feedback from businesses using SBMP every day</p>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4 fade-in-section">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="testimonial-text">"SBMP made it so much easier to track our stock. We always know what's running low before it becomes a problem."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">R</div>
+                        <div>
+                            <div class="testimonial-name">Rahim Ahmed</div>
+                            <div class="testimonial-role">Retail Store Owner</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 fade-in-section">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="testimonial-text">"The purchase-to-sales flow saved us hours every week. Everything from supplier orders to profit is finally in one place."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">F</div>
+                        <div>
+                            <div class="testimonial-name">Fatima Khan</div>
+                            <div class="testimonial-role">Wholesale Distributor</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 fade-in-section">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i>
+                    </div>
+                    <p class="testimonial-text">"Simple, fast, and does exactly what a small business needs. The profit report alone is worth switching over for."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">S</div>
+                        <div>
+                            <div class="testimonial-name">Sajib Hasan</div>
+                            <div class="testimonial-role">Electronics Shop Owner</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing Section -->
+<section id="pricing" class="benefits-section">
+    <div class="container">
+        <h2 class="section-title"><i class="bi bi-tag me-2" style="color: var(--accent-green-dark);"></i>Simple, Transparent Pricing</h2>
+        <p class="section-subtitle">Choose the plan that fits the size of your business</p>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6 col-lg-4 fade-in-section">
+                <div class="pricing-card">
+                    <h3 class="pricing-plan-name">Starter</h3>
+                    <p class="text-muted mb-0">For small shops just getting started</p>
+                    <div class="pricing-price">Free<span></span></div>
+                    <ul class="pricing-features">
+                        <li><i class="bi bi-check-circle-fill"></i>Up to 100 products</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Basic stock tracking</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Single user account</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Sales dashboard</li>
+                    </ul>
+                    <button class="btn btn-pricing" onclick="window.location.href='/register'">Get Started</button>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 fade-in-section">
+                <div class="pricing-card featured">
+                    <span class="pricing-badge">Most Popular</span>
+                    <h3 class="pricing-plan-name">Business</h3>
+                    <p class="text-muted mb-0">For growing businesses that need it all</p>
+                    <div class="pricing-price">$19<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li><i class="bi bi-check-circle-fill"></i>Unlimited products</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Full stock &amp; purchase management</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Supplier management</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Profit reports &amp; analytics</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Multiple user accounts</li>
+                    </ul>
+                    <button class="btn btn-pricing featured" onclick="window.location.href='/register'">Start Free Trial</button>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 fade-in-section">
+                <div class="pricing-card">
+                    <h3 class="pricing-plan-name">Enterprise</h3>
+                    <p class="text-muted mb-0">For large-scale, multi-branch operations</p>
+                    <div class="pricing-price">Custom<span></span></div>
+                    <ul class="pricing-features">
+                        <li><i class="bi bi-check-circle-fill"></i>Everything in Business</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Multi-branch stock sync</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Priority support</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Custom integrations</li>
+                    </ul>
+                    <button class="btn btn-pricing" onclick="window.location.href='/register'">Contact Us</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2 class="cta-title"><i class="bi bi-rocket-takeoff me-2"></i>Start Managing Your Stock Smarter Today</h2>
+            <p class="cta-subtitle">
+                Take control of your products, purchases, sales, and profit with SBMP.
+            </p>
+            <button class="btn btn-cta" onclick="window.location.href='/register'">
+                Create Free Account <i class="bi bi-arrow-right ms-2"></i>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 mb-4 mb-lg-0">
+                <h3 class="footer-brand"><i class="bi bi-boxes me-2"></i>SBMP</h3>
+                <p class="footer-description">
+                    Smart Business Management Platform — manage your products, purchases, stock, sales, and profit from one unified system.
+                </p>
+                <div class="social-icons">
+                    <a href="#" class="text-white me-3"><i class="bi bi-facebook" style="font-size: 1.5rem;"></i></a>
+                    <a href="#" class="text-white me-3"><i class="bi bi-twitter" style="font-size: 1.5rem;"></i></a>
+                    <a href="#" class="text-white me-3"><i class="bi bi-linkedin" style="font-size: 1.5rem;"></i></a>
+                    <a href="#" class="text-white"><i class="bi bi-instagram" style="font-size: 1.5rem;"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-4 mb-4 mb-lg-0">
+                <h5 class="mb-3"><i class="bi bi-box2 me-2"></i>Product</h5>
+                <ul class="footer-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#security">Security</a></li>
+                    <li><a href="#integrations">Integrations</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-4 mb-4 mb-lg-0">
+                <h5 class="mb-3"><i class="bi bi-building me-2"></i>Company</h5>
+                <ul class="footer-links">
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#blog">Blog</a></li>
+                    <li><a href="#careers">Careers</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-4 mb-4 mb-lg-0">
+                <h5 class="mb-3"><i class="bi bi-life-preserver me-2"></i>Resources</h5>
+                <ul class="footer-links">
+                    <li><a href="#help">Help Center</a></li>
+                    <li><a href="#docs">Documentation</a></li>
+                    <li><a href="#api">API Reference</a></li>
+                    <li><a href="#status">System Status</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-4">
+                <h5 class="mb-3"><i class="bi bi-file-earmark-text me-2"></i>Legal</h5>
+                <ul class="footer-links">
+                    <li><a href="#terms">Terms of Service</a></li>
+                    <li><a href="#privacy">Privacy Policy</a></li>
+                    <li><a href="#cookies">Cookie Policy</a></li>
+                    <li><a href="#compliance">Compliance</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 SBMP - Smart Business Management Platform. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar-custom');
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+
+    // Fade-in sections on scroll
+    const faders = document.querySelectorAll('.fade-in-section');
+
+    const appearOptions = {
+        threshold: 0.15,
+        rootMargin: "0px 0px -100px 0px"
+    };
+
+    const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) {
+                return;
+            } else {
+                entry.target.classList.add('is-visible');
+                appearOnScroll.unobserve(entry.target);
+            }
+        });
+    }, appearOptions);
+
+    faders.forEach(fader => {
+        appearOnScroll.observe(fader);
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            if (href !== '#') {
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
+    });
+    // Animated counters for stat numbers
+    const counters = document.querySelectorAll('.stat-number[data-count]');
+    const counterObserver = new IntersectionObserver(function(entries, obs) {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const el = entry.target;
+            const target = parseInt(el.getAttribute('data-count'), 10);
+            const suffix = el.getAttribute('data-suffix') || '';
+            const duration = 1200;
+            const start = performance.now();
+            function tick(now) {
+                const progress = Math.min((now - start) / duration, 1);
+                const value = Math.floor(progress * target);
+                el.textContent = value + suffix;
+                if (progress < 1) {
+                    requestAnimationFrame(tick);
+                } else {
+                    el.textContent = target + suffix;
+                }
+            }
+            requestAnimationFrame(tick);
+            obs.unobserve(el);
+        });
+    }, { threshold: 0.5 });
+
+    counters.forEach(counter => counterObserver.observe(counter));
+
+    // Image Slider
+    const sliderTrack = document.getElementById('sliderTrack');
+    const sliderDotsContainer = document.getElementById('sliderDots');
+    const slides = sliderTrack.querySelectorAll('.slide');
+    let currentSlide = 0;
+    let autoSlideTimer;
+
+    slides.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.classList.add('slider-dot');
+        if (i === 0) dot.classList.add('active');
+        dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+        dot.addEventListener('click', () => goToSlide(i));
+        sliderDotsContainer.appendChild(dot);
+    });
+
+    const dots = sliderDotsContainer.querySelectorAll('.slider-dot');
+
+    function updateSlider() {
+        sliderTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+    }
+
+    function goToSlide(i) {
+        currentSlide = i;
+        updateSlider();
+        resetAutoSlide();
+    }
+
+    window.moveSlide = function(direction) {
+        currentSlide = (currentSlide + direction + slides.length) % slides.length;
+        updateSlider();
+        resetAutoSlide();
+    };
+
+    function resetAutoSlide() {
+        clearInterval(autoSlideTimer);
+        autoSlideTimer = setInterval(() => {
+            currentSlide = (currentSlide + 1) % slides.length;
+            updateSlider();
+        }, 4000);
+    }
+
+    resetAutoSlide();
+</script>
+
+</body>
+</html>
+
+
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <meta name="description" content="eLoan SaaS - Smart Business Management Platform for inventory, sales, expenses, and analytics">-->
+<!--    <meta name="keywords" content="business management, inventory software, sales tracking, expense management, SaaS platform">-->
+<!--    <title>eLoan SaaS - Smart Business Management Platform</title>-->
+
+<!--    &lt;!&ndash; Bootstrap 5 CSS &ndash;&gt;-->
+<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">-->
+
+<!--    &lt;!&ndash; Bootstrap Icons &ndash;&gt;-->
+<!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">-->
+
+<!--    &lt;!&ndash; Google Fonts &ndash;&gt;-->
+<!--    <link rel="preconnect" href="https://fonts.googleapis.com">-->
+<!--    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>-->
+<!--    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">-->
+
+<!--    <style>-->
+<!--        :root {-->
+<!--            &#45;&#45;primary-blue: #3B82F6;-->
+<!--            &#45;&#45;primary-blue-light: #60A5FA;-->
+<!--            &#45;&#45;primary-blue-dark: #2563EB;-->
+<!--            &#45;&#45;secondary-blue: #0EA5E9;-->
+<!--            &#45;&#45;accent-cyan: #06B6D4;-->
+<!--            &#45;&#45;text-dark: #0F172A;-->
+<!--            &#45;&#45;text-muted: #64748B;-->
+<!--            &#45;&#45;bg-light: #F8FAFC;-->
+<!--            &#45;&#45;bg-white: #FFFFFF;-->
+<!--            &#45;&#45;border-light: #E2E8F0;-->
+<!--            &#45;&#45;shadow-sm: 0 2px 8px rgba(59, 130, 246, 0.08);-->
+<!--            &#45;&#45;shadow-md: 0 4px 24px rgba(59, 130, 246, 0.12);-->
+<!--            &#45;&#45;shadow-lg: 0 8px 40px rgba(59, 130, 246, 0.16);-->
+<!--            &#45;&#45;gradient-primary: linear-gradient(135deg, #3B82F6 0%, #0EA5E9 100%);-->
+<!--            &#45;&#45;gradient-light: linear-gradient(135deg, #EFF6FF 0%, #F0F9FF 100%);-->
+<!--        }-->
+
+<!--        * {-->
+<!--            margin: 0;-->
+<!--            padding: 0;-->
+<!--            box-sizing: border-box;-->
+<!--        }-->
+
+<!--        html {-->
+<!--            scroll-behavior: smooth;-->
+<!--        }-->
+
+<!--        body {-->
+<!--            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;-->
+<!--            color: var(&#45;&#45;text-dark);-->
+<!--            line-height: 1.7;-->
+<!--            background-color: var(&#45;&#45;bg-white);-->
+<!--            overflow-x: hidden;-->
+<!--        }-->
+
+<!--        h1, h2, h3, h4, h5, h6 {-->
+<!--            font-family: 'Outfit', sans-serif;-->
+<!--            font-weight: 700;-->
+<!--            line-height: 1.2;-->
+<!--            color: var(&#45;&#45;text-dark);-->
+<!--        }-->
+
+<!--        /* Navbar Styles */-->
+<!--        .navbar-custom {-->
+<!--            background: rgba(255, 255, 255, 0.95);-->
+<!--            backdrop-filter: blur(10px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--            transition: all 0.3s ease;-->
+<!--            padding: 1rem 0;-->
+<!--        }-->
+
+<!--        .navbar-custom.scrolled {-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--        }-->
+
+<!--        .navbar-brand {-->
+<!--            font-family: 'Outfit', sans-serif;-->
+<!--            font-size: 1.75rem;-->
+<!--            font-weight: 800;-->
+<!--            background: var(&#45;&#45;gradient-primary);-->
+<!--            -webkit-background-clip: text;-->
+<!--            -webkit-text-fill-color: transparent;-->
+<!--            background-clip: text;-->
+<!--            letter-spacing: -0.5px;-->
+<!--        }-->
+
+<!--        .nav-link {-->
+<!--            color: var(&#45;&#45;text-dark);-->
+<!--            font-weight: 500;-->
+<!--            margin: 0 0.5rem;-->
+<!--            transition: color 0.3s ease;-->
+<!--        }-->
+
+<!--        .nav-link:hover {-->
+<!--            color: var(&#45;&#45;primary-blue);-->
+<!--        }-->
+
+<!--        .btn-login {-->
+<!--            color: var(&#45;&#45;primary-blue);-->
+<!--            border: 2px solid var(&#45;&#45;primary-blue);-->
+<!--            padding: 0.5rem 1.5rem;-->
+<!--            border-radius: 8px;-->
+<!--            font-weight: 600;-->
+<!--            transition: all 0.3s ease;-->
+<!--            background: transparent;-->
+<!--        }-->
+
+<!--        .btn-login:hover {-->
+<!--            background: var(&#45;&#45;primary-blue);-->
+<!--            color: white;-->
+<!--            transform: translateY(-2px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--        }-->
+
+<!--        .btn-register {-->
+<!--            background: var(&#45;&#45;gradient-primary);-->
+<!--            color: white;-->
+<!--            padding: 0.5rem 1.5rem;-->
+<!--            border-radius: 8px;-->
+<!--            font-weight: 600;-->
+<!--            border: none;-->
+<!--            transition: all 0.3s ease;-->
+<!--            box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--        }-->
+
+<!--        .btn-register:hover {-->
+<!--            transform: translateY(-2px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--        }-->
+
+<!--        /* Hero Section */-->
+<!--        .hero-section {-->
+<!--            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 50%, #F0F9FF 100%);-->
+<!--            padding: 120px 0 80px;-->
+<!--            position: relative;-->
+<!--            overflow: hidden;-->
+<!--        }-->
+
+<!--        .hero-section::before {-->
+<!--            content: '';-->
+<!--            position: absolute;-->
+<!--            top: -50%;-->
+<!--            right: -20%;-->
+<!--            width: 800px;-->
+<!--            height: 800px;-->
+<!--            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);-->
+<!--            border-radius: 50%;-->
+<!--            animation: pulse 8s ease-in-out infinite;-->
+<!--        }-->
+
+<!--        @keyframes pulse {-->
+<!--            0%, 100% { transform: scale(1); opacity: 0.5; }-->
+<!--            50% { transform: scale(1.1); opacity: 0.8; }-->
+<!--        }-->
+
+<!--        .hero-content {-->
+<!--            position: relative;-->
+<!--            z-index: 2;-->
+<!--            animation: fadeInUp 0.8s ease-out;-->
+<!--        }-->
+
+<!--        @keyframes fadeInUp {-->
+<!--            from {-->
+<!--                opacity: 0;-->
+<!--                transform: translateY(30px);-->
+<!--            }-->
+<!--            to {-->
+<!--                opacity: 1;-->
+<!--                transform: translateY(0);-->
+<!--            }-->
+<!--        }-->
+
+<!--        .hero-title {-->
+<!--            font-size: 3.5rem;-->
+<!--            font-weight: 800;-->
+<!--            margin-bottom: 1.5rem;-->
+<!--            line-height: 1.1;-->
+<!--            letter-spacing: -1px;-->
+<!--        }-->
+
+<!--        .hero-subtitle {-->
+<!--            font-size: 1.25rem;-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--            margin-bottom: 2.5rem;-->
+<!--            max-width: 600px;-->
+<!--            line-height: 1.8;-->
+<!--        }-->
+
+<!--        .btn-hero {-->
+<!--            padding: 1rem 2.5rem;-->
+<!--            font-size: 1.1rem;-->
+<!--            font-weight: 600;-->
+<!--            border-radius: 12px;-->
+<!--            transition: all 0.3s ease;-->
+<!--            margin: 0.5rem;-->
+<!--        }-->
+
+<!--        .btn-hero-primary {-->
+<!--            background: var(&#45;&#45;gradient-primary);-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--        }-->
+
+<!--        .btn-hero-primary:hover {-->
+<!--            transform: translateY(-3px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--        }-->
+
+<!--        .btn-hero-secondary {-->
+<!--            background: white;-->
+<!--            color: var(&#45;&#45;primary-blue);-->
+<!--            border: 2px solid var(&#45;&#45;primary-blue);-->
+<!--        }-->
+
+<!--        .btn-hero-secondary:hover {-->
+<!--            background: var(&#45;&#45;primary-blue);-->
+<!--            color: white;-->
+<!--            transform: translateY(-3px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--        }-->
+
+<!--        .hero-image {-->
+<!--            position: relative;-->
+<!--            animation: fadeInRight 1s ease-out;-->
+<!--        }-->
+
+<!--        @keyframes fadeInRight {-->
+<!--            from {-->
+<!--                opacity: 0;-->
+<!--                transform: translateX(50px);-->
+<!--            }-->
+<!--            to {-->
+<!--                opacity: 1;-->
+<!--                transform: translateX(0);-->
+<!--            }-->
+<!--        }-->
+
+<!--        .dashboard-mockup {-->
+<!--            width: 100%;-->
+<!--            border-radius: 16px;-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--            background: white;-->
+<!--            padding: 1rem;-->
+<!--        }-->
+
+<!--        .mockup-header {-->
+<!--            background: var(&#45;&#45;gradient-light);-->
+<!--            height: 40px;-->
+<!--            border-radius: 8px 8px 0 0;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            padding: 0 1rem;-->
+<!--        }-->
+
+<!--        .mockup-dot {-->
+<!--            width: 10px;-->
+<!--            height: 10px;-->
+<!--            border-radius: 50%;-->
+<!--            margin-right: 6px;-->
+<!--        }-->
+
+<!--        .mockup-body {-->
+<!--            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);-->
+<!--            height: 300px;-->
+<!--            border-radius: 0 0 8px 8px;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            position: relative;-->
+<!--            overflow: hidden;-->
+<!--        }-->
+
+<!--        .mockup-body::before {-->
+<!--            content: '';-->
+<!--            position: absolute;-->
+<!--            width: 200%;-->
+<!--            height: 200%;-->
+<!--            background: radial-gradient(circle, var(&#45;&#45;primary-blue-light) 2px, transparent 2px);-->
+<!--            background-size: 30px 30px;-->
+<!--            opacity: 0.1;-->
+<!--            animation: float 20s linear infinite;-->
+<!--        }-->
+
+<!--        @keyframes float {-->
+<!--            0% { transform: translate(0, 0); }-->
+<!--            100% { transform: translate(-50%, -50%); }-->
+<!--        }-->
+
+<!--        /* Section Styles */-->
+<!--        section {-->
+<!--            padding: 80px 0;-->
+<!--        }-->
+
+<!--        .section-title {-->
+<!--            font-size: 2.5rem;-->
+<!--            font-weight: 800;-->
+<!--            text-align: center;-->
+<!--            margin-bottom: 1rem;-->
+<!--            letter-spacing: -0.5px;-->
+<!--        }-->
+
+<!--        .section-subtitle {-->
+<!--            font-size: 1.1rem;-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--            text-align: center;-->
+<!--            margin-bottom: 4rem;-->
+<!--            max-width: 700px;-->
+<!--            margin-left: auto;-->
+<!--            margin-right: auto;-->
+<!--        }-->
+
+<!--        /* Feature Cards */-->
+<!--        .feature-card {-->
+<!--            background: white;-->
+<!--            border-radius: 16px;-->
+<!--            padding: 2rem;-->
+<!--            height: 100%;-->
+<!--            border: 1px solid var(&#45;&#45;border-light);-->
+<!--            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--            position: relative;-->
+<!--            overflow: hidden;-->
+<!--        }-->
+
+<!--        .feature-card::before {-->
+<!--            content: '';-->
+<!--            position: absolute;-->
+<!--            top: 0;-->
+<!--            left: 0;-->
+<!--            width: 100%;-->
+<!--            height: 4px;-->
+<!--            background: var(&#45;&#45;gradient-primary);-->
+<!--            transform: scaleX(0);-->
+<!--            transition: transform 0.4s ease;-->
+<!--        }-->
+
+<!--        .feature-card:hover {-->
+<!--            transform: translateY(-8px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--            border-color: var(&#45;&#45;primary-blue-light);-->
+<!--        }-->
+
+<!--        .feature-card:hover::before {-->
+<!--            transform: scaleX(1);-->
+<!--        }-->
+
+<!--        .feature-icon {-->
+<!--            width: 64px;-->
+<!--            height: 64px;-->
+<!--            background: var(&#45;&#45;gradient-light);-->
+<!--            border-radius: 12px;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            margin-bottom: 1.5rem;-->
+<!--            font-size: 1.75rem;-->
+<!--            color: var(&#45;&#45;primary-blue);-->
+<!--            transition: all 0.3s ease;-->
+<!--        }-->
+
+<!--        .feature-card:hover .feature-icon {-->
+<!--            background: var(&#45;&#45;gradient-primary);-->
+<!--            color: white;-->
+<!--            transform: scale(1.1) rotate(5deg);-->
+<!--        }-->
+
+<!--        .feature-title {-->
+<!--            font-size: 1.4rem;-->
+<!--            font-weight: 700;-->
+<!--            margin-bottom: 1rem;-->
+<!--        }-->
+
+<!--        .feature-description {-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--            line-height: 1.7;-->
+<!--        }-->
+
+<!--        /* Benefits Section */-->
+<!--        .benefits-section {-->
+<!--            background: var(&#45;&#45;gradient-light);-->
+<!--        }-->
+
+<!--        .benefit-item {-->
+<!--            display: flex;-->
+<!--            align-items: flex-start;-->
+<!--            margin-bottom: 2rem;-->
+<!--            animation: fadeIn 0.6s ease-out;-->
+<!--        }-->
+
+<!--        @keyframes fadeIn {-->
+<!--            from { opacity: 0; }-->
+<!--            to { opacity: 1; }-->
+<!--        }-->
+
+<!--        .benefit-icon {-->
+<!--            width: 48px;-->
+<!--            height: 48px;-->
+<!--            background: var(&#45;&#45;gradient-primary);-->
+<!--            border-radius: 10px;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            color: white;-->
+<!--            font-size: 1.25rem;-->
+<!--            margin-right: 1.5rem;-->
+<!--            flex-shrink: 0;-->
+<!--        }-->
+
+<!--        .benefit-content h4 {-->
+<!--            font-size: 1.25rem;-->
+<!--            font-weight: 700;-->
+<!--            margin-bottom: 0.5rem;-->
+<!--        }-->
+
+<!--        .benefit-content p {-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--            margin: 0;-->
+<!--        }-->
+
+<!--        .benefits-visual {-->
+<!--            background: white;-->
+<!--            border-radius: 16px;-->
+<!--            padding: 3rem;-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--            position: relative;-->
+<!--        }-->
+
+<!--        .stats-grid {-->
+<!--            display: grid;-->
+<!--            grid-template-columns: repeat(2, 1fr);-->
+<!--            gap: 2rem;-->
+<!--        }-->
+
+<!--        .stat-item {-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        .stat-number {-->
+<!--            font-size: 2.5rem;-->
+<!--            font-weight: 800;-->
+<!--            background: var(&#45;&#45;gradient-primary);-->
+<!--            -webkit-background-clip: text;-->
+<!--            -webkit-text-fill-color: transparent;-->
+<!--            background-clip: text;-->
+<!--            margin-bottom: 0.5rem;-->
+<!--        }-->
+
+<!--        .stat-label {-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--            font-size: 0.95rem;-->
+<!--        }-->
+
+<!--        /* CTA Section */-->
+<!--        .cta-section {-->
+<!--            background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 50%, #0EA5E9 100%);-->
+<!--            color: white;-->
+<!--            position: relative;-->
+<!--            overflow: hidden;-->
+<!--        }-->
+
+<!--        .cta-section::before {-->
+<!--            content: '';-->
+<!--            position: absolute;-->
+<!--            top: -50%;-->
+<!--            left: -50%;-->
+<!--            width: 200%;-->
+<!--            height: 200%;-->
+<!--            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);-->
+<!--            background-size: 50px 50px;-->
+<!--            animation: drift 30s linear infinite;-->
+<!--        }-->
+
+<!--        @keyframes drift {-->
+<!--            0% { transform: translate(0, 0); }-->
+<!--            100% { transform: translate(50px, 50px); }-->
+<!--        }-->
+
+<!--        .cta-content {-->
+<!--            position: relative;-->
+<!--            z-index: 2;-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        .cta-title {-->
+<!--            font-size: 2.75rem;-->
+<!--            font-weight: 800;-->
+<!--            margin-bottom: 1.5rem;-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        .cta-subtitle {-->
+<!--            font-size: 1.25rem;-->
+<!--            margin-bottom: 2.5rem;-->
+<!--            opacity: 0.95;-->
+<!--        }-->
+
+<!--        .btn-cta {-->
+<!--            background: white;-->
+<!--            color: var(&#45;&#45;primary-blue);-->
+<!--            padding: 1.2rem 3rem;-->
+<!--            font-size: 1.2rem;-->
+<!--            font-weight: 700;-->
+<!--            border-radius: 12px;-->
+<!--            border: none;-->
+<!--            transition: all 0.3s ease;-->
+<!--            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);-->
+<!--        }-->
+
+<!--        .btn-cta:hover {-->
+<!--            transform: translateY(-3px) scale(1.05);-->
+<!--            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);-->
+<!--        }-->
+
+<!--        /* Footer */-->
+<!--        .footer {-->
+<!--            background: var(&#45;&#45;text-dark);-->
+<!--            color: white;-->
+<!--            padding: 3rem 0 1.5rem;-->
+<!--        }-->
+
+<!--        .footer-brand {-->
+<!--            font-family: 'Outfit', sans-serif;-->
+<!--            font-size: 1.5rem;-->
+<!--            font-weight: 800;-->
+<!--            color: white;-->
+<!--            margin-bottom: 1rem;-->
+<!--        }-->
+
+<!--        .footer-description {-->
+<!--            color: rgba(255, 255, 255, 0.7);-->
+<!--            margin-bottom: 2rem;-->
+<!--            max-width: 350px;-->
+<!--        }-->
+
+<!--        .footer-links {-->
+<!--            list-style: none;-->
+<!--            padding: 0;-->
+<!--        }-->
+
+<!--        .footer-links li {-->
+<!--            margin-bottom: 0.75rem;-->
+<!--        }-->
+
+<!--        .footer-links a {-->
+<!--            color: rgba(255, 255, 255, 0.7);-->
+<!--            text-decoration: none;-->
+<!--            transition: color 0.3s ease;-->
+<!--        }-->
+
+<!--        .footer-links a:hover {-->
+<!--            color: var(&#45;&#45;primary-blue-light);-->
+<!--        }-->
+
+<!--        .footer-bottom {-->
+<!--            border-top: 1px solid rgba(255, 255, 255, 0.1);-->
+<!--            padding-top: 1.5rem;-->
+<!--            margin-top: 2rem;-->
+<!--            text-align: center;-->
+<!--            color: rgba(255, 255, 255, 0.6);-->
+<!--            font-size: 0.9rem;-->
+<!--        }-->
+
+<!--        /* Responsive Design */-->
+<!--        @media (max-width: 768px) {-->
+<!--            .hero-title {-->
+<!--                font-size: 2.5rem;-->
+<!--            }-->
+
+<!--            .hero-subtitle {-->
+<!--                font-size: 1.1rem;-->
+<!--            }-->
+
+<!--            .section-title {-->
+<!--                font-size: 2rem;-->
+<!--            }-->
+
+<!--            .cta-title {-->
+<!--                font-size: 2rem;-->
+<!--            }-->
+
+<!--            .btn-hero {-->
+<!--                padding: 0.875rem 2rem;-->
+<!--                font-size: 1rem;-->
+<!--                display: block;-->
+<!--                width: 100%;-->
+<!--                margin: 0.5rem 0;-->
+<!--            }-->
+
+<!--            .stats-grid {-->
+<!--                grid-template-columns: 1fr;-->
+<!--                gap: 1.5rem;-->
+<!--            }-->
+
+<!--            .navbar-brand {-->
+<!--                font-size: 1.5rem;-->
+<!--            }-->
+<!--        }-->
+
+<!--        /* Utility Classes */-->
+<!--        .text-gradient {-->
+<!--            background: var(&#45;&#45;gradient-primary);-->
+<!--            -webkit-background-clip: text;-->
+<!--            -webkit-text-fill-color: transparent;-->
+<!--            background-clip: text;-->
+<!--        }-->
+
+<!--        /* Loading Animation */-->
+<!--        .fade-in-section {-->
+<!--            opacity: 0;-->
+<!--            transform: translateY(30px);-->
+<!--            transition: opacity 0.6s ease-out, transform 0.6s ease-out;-->
+<!--        }-->
+
+<!--        .fade-in-section.is-visible {-->
+<!--            opacity: 1;-->
+<!--            transform: translateY(0);-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--&lt;!&ndash; Navbar &ndash;&gt;-->
+<!--<nav class="navbar navbar-expand-lg navbar-custom fixed-top">-->
+<!--    <div class="container">-->
+<!--        <a class="navbar-brand" href="#">eLoan SaaS</a>-->
+<!--        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"-->
+<!--                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">-->
+<!--            <span class="navbar-toggler-icon"></span>-->
+<!--        </button>-->
+<!--        <div class="collapse navbar-collapse" id="navbarNav">-->
+<!--            <ul class="navbar-nav ms-auto align-items-center">-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" href="#features">Features</a>-->
+<!--                </li>-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" href="#benefits">Benefits</a>-->
+<!--                </li>-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" href="#pricing">Pricing</a>-->
+<!--                </li>-->
+<!--                <li class="nav-item ms-lg-3">-->
+<!--                    <button class="btn btn-login"-->
+<!--                            onclick="window.location.href='/login'">-->
+<!--                        Login-->
+<!--                    </button>-->
+
+<!--                </li>-->
+<!--                <li class="nav-item ms-2">-->
+<!--                    <button class="btn btn-register"-->
+<!--                            onclick="window.location.href='/register'">-->
+<!--                        Register-->
+<!--                    </button>-->
+<!--                </li>-->
+<!--            </ul>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</nav>-->
+
+<!--&lt;!&ndash; Hero Section &ndash;&gt;-->
+<!--<section class="hero-section">-->
+<!--    <div class="container">-->
+<!--        <div class="row align-items-center">-->
+<!--            <div class="col-lg-6 hero-content">-->
+<!--                <h1 class="hero-title">-->
+<!--                    Smart Business<br>-->
+<!--                    <span class="text-gradient">Management Platform</span>-->
+<!--                </h1>-->
+<!--                <p class="hero-subtitle">-->
+<!--                    Manage inventory, sales, expenses, reports, and business operations from one powerful cloud platform. Built for modern businesses.-->
+<!--                </p>-->
+<!--                <div class="hero-buttons">-->
+<!--                    <button class="btn btn-hero btn-hero-primary" onclick="window.location.href='/register'">-->
+<!--                        <i class="bi bi-rocket-takeoff me-2"></i>Start Free-->
+<!--                    </button>-->
+<!--                    <button class="btn btn-hero btn-hero-secondary" onclick="window.location.href='/login'">-->
+<!--                        <i class="bi bi-box-arrow-in-right me-2"></i>Login-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="col-lg-6 hero-image mt-5 mt-lg-0">-->
+<!--                <div class="dashboard-mockup">-->
+<!--                    <div class="mockup-header">-->
+<!--                        <span class="mockup-dot" style="background: #FF5F57;"></span>-->
+<!--                        <span class="mockup-dot" style="background: #FFBD2E;"></span>-->
+<!--                        <span class="mockup-dot" style="background: #28CA42;"></span>-->
+<!--                    </div>-->
+<!--                    <div class="mockup-body">-->
+<!--                        <div class="text-center">-->
+<!--                            <i class="bi bi-graph-up-arrow" style="font-size: 4rem; color: var(&#45;&#45;primary-blue);"></i>-->
+<!--                            <h3 class="mt-3" style="color: var(&#45;&#45;text-dark);">Analytics Dashboard</h3>-->
+<!--                            <p class="text-muted">Real-time business insights</p>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</section>-->
+
+<!--&lt;!&ndash; Features Section &ndash;&gt;-->
+<!--<section id="features">-->
+<!--    <div class="container">-->
+<!--        <h2 class="section-title">Powerful Features for Your Business</h2>-->
+<!--        <p class="section-subtitle">-->
+<!--            Everything you need to manage and grow your business efficiently-->
+<!--        </p>-->
+
+<!--        <div class="row g-4">-->
+<!--            <div class="col-md-6 col-lg-4 fade-in-section">-->
+<!--                <div class="feature-card">-->
+<!--                    <div class="feature-icon">-->
+<!--                        <i class="bi bi-box-seam"></i>-->
+<!--                    </div>-->
+<!--                    <h3 class="feature-title">Inventory Management</h3>-->
+<!--                    <p class="feature-description">-->
+<!--                        Track stock levels, manage products, and automate reordering. Real-time inventory updates across all locations.-->
+<!--                    </p>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="col-md-6 col-lg-4 fade-in-section">-->
+<!--                <div class="feature-card">-->
+<!--                    <div class="feature-icon">-->
+<!--                        <i class="bi bi-graph-up"></i>-->
+<!--                    </div>-->
+<!--                    <h3 class="feature-title">Sales Tracking</h3>-->
+<!--                    <p class="feature-description">-->
+<!--                        Monitor sales performance, track revenue trends, and generate invoices. Complete sales pipeline visibility.-->
+<!--                    </p>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="col-md-6 col-lg-4 fade-in-section">-->
+<!--                <div class="feature-card">-->
+<!--                    <div class="feature-icon">-->
+<!--                        <i class="bi bi-wallet2"></i>-->
+<!--                    </div>-->
+<!--                    <h3 class="feature-title">Expense Management</h3>-->
+<!--                    <p class="feature-description">-->
+<!--                        Control costs, track expenses, and manage budgets. Automated expense categorization and reporting.-->
+<!--                    </p>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="col-md-6 col-lg-4 fade-in-section">-->
+<!--                <div class="feature-card">-->
+<!--                    <div class="feature-icon">-->
+<!--                        <i class="bi bi-calendar-check"></i>-->
+<!--                    </div>-->
+<!--                    <h3 class="feature-title">Due Management</h3>-->
+<!--                    <p class="feature-description">-->
+<!--                        Never miss a payment. Track receivables, payables, and get automated reminders for due dates.-->
+<!--                    </p>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="col-md-6 col-lg-4 fade-in-section">-->
+<!--                <div class="feature-card">-->
+<!--                    <div class="feature-icon">-->
+<!--                        <i class="bi bi-pie-chart"></i>-->
+<!--                    </div>-->
+<!--                    <h3 class="feature-title">Analytics Dashboard</h3>-->
+<!--                    <p class="feature-description">-->
+<!--                        Beautiful visualizations and insights. Make data-driven decisions with comprehensive business analytics.-->
+<!--                    </p>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="col-md-6 col-lg-4 fade-in-section">-->
+<!--                <div class="feature-card">-->
+<!--                    <div class="feature-icon">-->
+<!--                        <i class="bi bi-building"></i>-->
+<!--                    </div>-->
+<!--                    <h3 class="feature-title">Multi-Business Support</h3>-->
+<!--                    <p class="feature-description">-->
+<!--                        Manage multiple businesses from one account. Perfect for entrepreneurs with multiple ventures.-->
+<!--                    </p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</section>-->
+
+<!--&lt;!&ndash; Benefits Section &ndash;&gt;-->
+<!--<section id="benefits" class="benefits-section">-->
+<!--    <div class="container">-->
+<!--        <h2 class="section-title">Why Choose eLoan SaaS</h2>-->
+<!--        <p class="section-subtitle">-->
+<!--            Built with modern technology and designed for the future-->
+<!--        </p>-->
+
+<!--        <div class="row align-items-center">-->
+<!--            <div class="col-lg-6">-->
+<!--                <div class="benefit-item">-->
+<!--                    <div class="benefit-icon">-->
+<!--                        <i class="bi bi-cloud-check"></i>-->
+<!--                    </div>-->
+<!--                    <div class="benefit-content">-->
+<!--                        <h4>100% Cloud Based</h4>-->
+<!--                        <p>Access your business data anywhere, anytime. No installation required, automatic updates included.</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="benefit-item">-->
+<!--                    <div class="benefit-icon">-->
+<!--                        <i class="bi bi-shield-check"></i>-->
+<!--                    </div>-->
+<!--                    <div class="benefit-content">-->
+<!--                        <h4>Bank-Level Security</h4>-->
+<!--                        <p>Enterprise-grade encryption, secure data centers, and regular security audits keep your data safe.</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="benefit-item">-->
+<!--                    <div class="benefit-icon">-->
+<!--                        <i class="bi bi-phone"></i>-->
+<!--                    </div>-->
+<!--                    <div class="benefit-content">-->
+<!--                        <h4>Multi-Device Support</h4>-->
+<!--                        <p>Seamlessly switch between desktop, tablet, and mobile. Your business in your pocket.</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="benefit-item">-->
+<!--                    <div class="benefit-icon">-->
+<!--                        <i class="bi bi-lightning"></i>-->
+<!--                    </div>-->
+<!--                    <div class="benefit-content">-->
+<!--                        <h4>Lightning Fast Performance</h4>-->
+<!--                        <p>Optimized infrastructure ensures instant load times and smooth user experience.</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="benefit-item">-->
+<!--                    <div class="benefit-icon">-->
+<!--                        <i class="bi bi-bar-chart"></i>-->
+<!--                    </div>-->
+<!--                    <div class="benefit-content">-->
+<!--                        <h4>Advanced Business Analytics</h4>-->
+<!--                        <p>Gain deep insights with AI-powered analytics and customizable reporting dashboards.</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="col-lg-6 mt-5 mt-lg-0">-->
+<!--                <div class="benefits-visual">-->
+<!--                    <h3 class="text-center mb-4">Trusted by Businesses</h3>-->
+<!--                    <div class="stats-grid">-->
+<!--                        <div class="stat-item">-->
+<!--                            <div class="stat-number">10K+</div>-->
+<!--                            <div class="stat-label">Active Users</div>-->
+<!--                        </div>-->
+<!--                        <div class="stat-item">-->
+<!--                            <div class="stat-number">99.9%</div>-->
+<!--                            <div class="stat-label">Uptime</div>-->
+<!--                        </div>-->
+<!--                        <div class="stat-item">-->
+<!--                            <div class="stat-number">50+</div>-->
+<!--                            <div class="stat-label">Countries</div>-->
+<!--                        </div>-->
+<!--                        <div class="stat-item">-->
+<!--                            <div class="stat-number">4.9/5</div>-->
+<!--                            <div class="stat-label">User Rating</div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+
+<!--                    <div class="text-center mt-5">-->
+<!--                        <i class="bi bi-award" style="font-size: 4rem; color: var(&#45;&#45;primary-blue);"></i>-->
+<!--                        <h4 class="mt-3">Award-Winning Platform</h4>-->
+<!--                        <p class="text-muted">Recognized for innovation and excellence</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</section>-->
+
+<!--&lt;!&ndash; CTA Section &ndash;&gt;-->
+<!--<section class="cta-section">-->
+<!--    <div class="container">-->
+<!--        <div class="cta-content">-->
+<!--            <h2 class="cta-title">Start Managing Your Business Smarter Today</h2>-->
+<!--            <p class="cta-subtitle">-->
+<!--                Join thousands of businesses already using eLoan SaaS. No credit card required.-->
+<!--            </p>-->
+<!--            <button class="btn btn-cta" onclick="window.location.href='/register'">-->
+<!--                Create Free Account <i class="bi bi-arrow-right ms-2"></i>-->
+<!--            </button>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</section>-->
+
+<!--&lt;!&ndash; Footer &ndash;&gt;-->
+<!--<footer class="footer">-->
+<!--    <div class="container">-->
+<!--        <div class="row">-->
+<!--            <div class="col-lg-4 mb-4 mb-lg-0">-->
+<!--                <h3 class="footer-brand">eLoan SaaS</h3>-->
+<!--                <p class="footer-description">-->
+<!--                    The modern business management platform built for growth. Manage your entire business from one powerful cloud solution.-->
+<!--                </p>-->
+<!--                <div class="social-icons">-->
+<!--                    <a href="#" class="text-white me-3"><i class="bi bi-facebook" style="font-size: 1.5rem;"></i></a>-->
+<!--                    <a href="#" class="text-white me-3"><i class="bi bi-twitter" style="font-size: 1.5rem;"></i></a>-->
+<!--                    <a href="#" class="text-white me-3"><i class="bi bi-linkedin" style="font-size: 1.5rem;"></i></a>-->
+<!--                    <a href="#" class="text-white"><i class="bi bi-instagram" style="font-size: 1.5rem;"></i></a>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="col-lg-2 col-md-4 mb-4 mb-lg-0">-->
+<!--                <h5 class="mb-3">Product</h5>-->
+<!--                <ul class="footer-links">-->
+<!--                    <li><a href="#features">Features</a></li>-->
+<!--                    <li><a href="#pricing">Pricing</a></li>-->
+<!--                    <li><a href="#security">Security</a></li>-->
+<!--                    <li><a href="#integrations">Integrations</a></li>-->
+<!--                </ul>-->
+<!--            </div>-->
+
+<!--            <div class="col-lg-2 col-md-4 mb-4 mb-lg-0">-->
+<!--                <h5 class="mb-3">Company</h5>-->
+<!--                <ul class="footer-links">-->
+<!--                    <li><a href="#about">About Us</a></li>-->
+<!--                    <li><a href="#blog">Blog</a></li>-->
+<!--                    <li><a href="#careers">Careers</a></li>-->
+<!--                    <li><a href="#contact">Contact</a></li>-->
+<!--                </ul>-->
+<!--            </div>-->
+
+<!--            <div class="col-lg-2 col-md-4 mb-4 mb-lg-0">-->
+<!--                <h5 class="mb-3">Resources</h5>-->
+<!--                <ul class="footer-links">-->
+<!--                    <li><a href="#help">Help Center</a></li>-->
+<!--                    <li><a href="#docs">Documentation</a></li>-->
+<!--                    <li><a href="#api">API Reference</a></li>-->
+<!--                    <li><a href="#status">System Status</a></li>-->
+<!--                </ul>-->
+<!--            </div>-->
+
+<!--            <div class="col-lg-2 col-md-4">-->
+<!--                <h5 class="mb-3">Legal</h5>-->
+<!--                <ul class="footer-links">-->
+<!--                    <li><a href="#terms">Terms of Service</a></li>-->
+<!--                    <li><a href="#privacy">Privacy Policy</a></li>-->
+<!--                    <li><a href="#cookies">Cookie Policy</a></li>-->
+<!--                    <li><a href="#compliance">Compliance</a></li>-->
+<!--                </ul>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div class="footer-bottom">-->
+<!--            <p>&copy; 2024 eLoan SaaS. All rights reserved. Built with passion for modern businesses.</p>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</footer>-->
+
+<!--&lt;!&ndash; Bootstrap JS &ndash;&gt;-->
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>-->
+
+<!--<script>-->
+<!--    // Navbar scroll effect-->
+<!--    window.addEventListener('scroll', function() {-->
+<!--        const navbar = document.querySelector('.navbar-custom');-->
+<!--        if (window.scrollY > 50) {-->
+<!--            navbar.classList.add('scrolled');-->
+<!--        } else {-->
+<!--            navbar.classList.remove('scrolled');-->
+<!--        }-->
+<!--    });-->
+
+<!--    // Fade-in sections on scroll-->
+<!--    const faders = document.querySelectorAll('.fade-in-section');-->
+
+<!--    const appearOptions = {-->
+<!--        threshold: 0.15,-->
+<!--        rootMargin: "0px 0px -100px 0px"-->
+<!--    };-->
+
+<!--    const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {-->
+<!--        entries.forEach(entry => {-->
+<!--            if (!entry.isIntersecting) {-->
+<!--                return;-->
+<!--            } else {-->
+<!--                entry.target.classList.add('is-visible');-->
+<!--                appearOnScroll.unobserve(entry.target);-->
+<!--            }-->
+<!--        });-->
+<!--    }, appearOptions);-->
+
+<!--    faders.forEach(fader => {-->
+<!--        appearOnScroll.observe(fader);-->
+<!--    });-->
+
+<!--    // Smooth scroll for anchor links-->
+<!--    document.querySelectorAll('a[href^="#"]').forEach(anchor => {-->
+<!--        anchor.addEventListener('click', function (e) {-->
+<!--            const href = this.getAttribute('href');-->
+<!--            if (href !== '#') {-->
+<!--                e.preventDefault();-->
+<!--                const target = document.querySelector(href);-->
+<!--                if (target) {-->
+<!--                    target.scrollIntoView({-->
+<!--                        behavior: 'smooth',-->
+<!--                        block: 'start'-->
+<!--                    });-->
+<!--                }-->
+<!--            }-->
+<!--        });-->
+<!--    });-->
+<!--</script>-->
+
+<!--</body>-->
+<!--</html>-->

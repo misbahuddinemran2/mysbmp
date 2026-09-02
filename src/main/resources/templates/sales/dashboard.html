@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Sales Dashboard · ERP</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <link rel="stylesheet" th:href="@{/css/sales.css}"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        :root{
+            --lg-ink:#101828;
+            --lg-ink-soft:#475467;
+            --lg-paper:#F7F8F6;
+            --lg-card:#FFFFFF;
+            --lg-border:#E4E7EC;
+            --lg-teal:#0E6B68;
+            --lg-teal-deep:#0B4F4D;
+            --lg-teal-tint:#E6F1F0;
+            --lg-amber:#B5680D;
+            --lg-amber-tint:#FBF0E1;
+            --lg-rose:#B3261E;
+            --lg-rose-tint:#FBEAE9;
+            --lg-blue:#2A4C7D;
+            --lg-blue-tint:#E9EFF7;
+        }
+
+        .page-content{ background:var(--lg-paper); font-family:'Inter',sans-serif; color:var(--lg-ink); }
+
+        /* ---------- Header ---------- */
+        .sv-header{
+            display:flex; align-items:flex-end; justify-content:space-between;
+            flex-wrap:wrap; gap:1rem; margin-bottom:1.75rem;
+            padding-bottom:1.25rem; position:relative;
+        }
+        .sv-header::after{
+            content:""; position:absolute; left:0; right:0; bottom:0; height:1px;
+            background-image:linear-gradient(to right, var(--lg-border) 60%, transparent 0%);
+            background-size:10px 1px; background-repeat:repeat-x;
+        }
+        .sv-eyebrow{
+            font-family:'IBM Plex Mono',monospace; font-size:.6875rem; letter-spacing:.14em;
+            text-transform:uppercase; color:var(--lg-teal); font-weight:600; display:block; margin-bottom:.4rem;
+        }
+        .sv-title{
+            font-family:'Fraunces',serif; font-weight:600; font-size:2rem; color:var(--lg-ink);
+            letter-spacing:-.01em; margin:0; line-height:1.1;
+        }
+        .sv-subtitle{ color:var(--lg-ink-soft); font-size:.9rem; margin:.3rem 0 0; }
+        .breadcrumb-erp{ font-size:.8rem; }
+        .breadcrumb-erp a{ color:var(--lg-ink-soft); text-decoration:none; }
+
+        .sv-btn{
+            font-family:'Inter',sans-serif; font-weight:600; font-size:.85rem;
+            border-radius:8px; padding:.55rem 1.05rem; display:inline-flex; align-items:center;
+            border:1px solid transparent; transition:all .15s ease;
+        }
+        .sv-btn-ghost{ background:var(--lg-card); border-color:var(--lg-border); color:var(--lg-ink); }
+        .sv-btn-ghost:hover{ border-color:var(--lg-teal); color:var(--lg-teal-deep); }
+        .sv-btn-solid{ background:var(--lg-teal); color:#fff; box-shadow:0 1px 2px rgba(14,107,104,.25); }
+        .sv-btn-solid:hover{ background:var(--lg-teal-deep); color:#fff; }
+
+        /* ---------- Alerts ---------- */
+        .alert{ border-radius:10px; border:1px solid var(--lg-border); font-size:.875rem; }
+
+        /* ---------- KPI Statement Strip ---------- */
+        .sv-kpi-strip{
+            background:var(--lg-card); border:1px solid var(--lg-border); border-radius:14px;
+            display:flex; flex-wrap:wrap; margin-bottom:1.25rem; overflow:hidden;
+            box-shadow:0 1px 2px rgba(16,24,40,.04);
+        }
+        .sv-kpi{
+            flex:1 1 200px; padding:1.1rem 1.35rem; position:relative;
+            border-right:1px solid var(--lg-border);
+        }
+        .sv-kpi:last-child{ border-right:none; }
+        .sv-kpi__label{
+            font-family:'IBM Plex Mono',monospace; font-size:.65rem; text-transform:uppercase;
+            letter-spacing:.1em; color:var(--lg-ink-soft); margin:0 0 .5rem; display:flex; align-items:center; gap:.4rem;
+        }
+        .sv-kpi__label i{ font-size:.85rem; color:var(--lg-teal); }
+        .sv-kpi__value{
+            font-size: 1.35rem !important;
+            display:flex; align-items:baseline; gap:2px;
+            color:var(--lg-ink); margin:0; line-height:1.15; letter-spacing:-.01em;
+        }
+        .sv-kpi__value small{
+            font-family:'IBM Plex Mono',monospace !important;
+            font-size:.85rem !important; font-weight:500 !important; color:var(--lg-ink-soft);
+        }
+        .sv-kpi__sub{ font-size:.75rem; color:var(--lg-ink-soft); margin:.3rem 0 0; }
+        .sv-kpi--due .sv-kpi__value{ color:var(--lg-rose); }
+        .sv-kpi--paid .sv-kpi__value{ color:var(--lg-teal-deep); }
+
+        /* ---------- Cards ---------- */
+        .sv-card{
+            background:var(--lg-card); border:1px solid var(--lg-border); border-radius:14px;
+            box-shadow:0 1px 2px rgba(16,24,40,.04); height:100%; display:flex; flex-direction:column;
+        }
+        .sv-card__head{
+            display:flex; align-items:center; gap:.75rem; padding:1.1rem 1.35rem;
+            border-bottom:1px solid var(--lg-border);
+        }
+        .sv-card__icon{
+            width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+            background:var(--lg-teal-tint); color:var(--lg-teal-deep); font-size:1rem; flex:none;
+        }
+        .sv-card__icon--amber{ background:var(--lg-amber-tint); color:var(--lg-amber); }
+        .sv-card__title{ font-family:'Fraunces',serif !important; font-weight:600; font-size:1.02rem; color:var(--lg-ink); margin:0; }
+        .sv-card__subtitle{ font-size:.78rem; color:var(--lg-ink-soft); margin:0; }
+        .sv-card__body{ padding:1.1rem 1.35rem; flex:1; }
+        .sv-card__body.p-0{ padding:0; }
+        .sv-link-all{
+            margin-left:auto; font-size:.78rem; font-weight:600; color:var(--lg-teal-deep); text-decoration:none;
+            white-space:nowrap;
+        }
+        .sv-link-all:hover{ color:var(--lg-teal); }
+
+        /* ---------- Table ---------- */
+        .sv-table{ margin:0; font-size:.85rem; }
+        .sv-table thead th{
+            font-family:'IBM Plex Mono',monospace; font-size:.65rem; text-transform:uppercase; letter-spacing:.08em;
+            color:var(--lg-ink-soft); font-weight:600; border-bottom:1px solid var(--lg-border);
+            padding:.7rem 1.35rem; background:#FAFAF9;
+        }
+        .sv-table tbody td{ padding:.75rem 1.35rem; border-bottom:1px solid var(--lg-border); vertical-align:middle; }
+        .sv-table tbody tr:last-child td{ border-bottom:none; }
+        .sv-invoice-chip{
+            font-family:'IBM Plex Mono',monospace !important; font-weight:600 !important; font-size:.78rem; color:var(--lg-teal-deep);
+            text-decoration:none; border:1px solid var(--lg-teal-tint); background:var(--lg-teal-tint);
+            padding:.15rem .5rem; border-radius:6px; white-space:nowrap; letter-spacing:-0.01em;
+        }
+        .sv-invoice-chip:hover{ background:var(--lg-teal); color:#fff; border-color:var(--lg-teal); }
+        .sv-amount{ font-family:'IBM Plex Mono',monospace !important; font-weight:600 !important; letter-spacing:-0.01em; }
+        .sv-badge{
+            font-family:'Inter',sans-serif; font-size:.7rem; font-weight:600; padding:.3rem .55rem;
+            border-radius:20px; text-transform:capitalize;
+        }
+        .sv-badge--completed{ background:var(--lg-teal-tint); color:var(--lg-teal-deep); }
+        .sv-badge--cancelled{ background:var(--lg-rose-tint); color:var(--lg-rose); }
+        .sv-badge--draft{ background:var(--lg-blue-tint); color:var(--lg-blue); }
+
+        /* ---------- Empty state ---------- */
+        .sv-empty{ text-align:center; padding:2.75rem 1rem; color:var(--lg-ink-soft); }
+        .sv-empty i{ font-size:2.2rem; opacity:.25; display:block; margin-bottom:.6rem; }
+        .sv-empty p{ margin:0; font-weight:600; font-size:.9rem; }
+
+        /* ---------- Draft list (ledger stub style) ---------- */
+        .sv-draft-list{ list-style:none; margin:0; padding:0; }
+        .sv-draft-item{
+            display:flex; align-items:center; justify-content:space-between; gap:.75rem;
+            padding:.85rem 0; border-bottom:1px dashed var(--lg-border);
+        }
+        .sv-draft-item:last-child{ border-bottom:none; }
+        .sv-draft-item__num{
+            font-family:'IBM Plex Mono',monospace !important; font-weight:600 !important; font-size:.82rem; color:var(--lg-ink);
+            display:block; letter-spacing:-0.01em;
+        }
+        .sv-draft-item__meta{ font-size:.75rem; color:var(--lg-ink-soft); }
+        .sv-draft-item__right{ text-align:right; display:flex; align-items:center; gap:.85rem; }
+        .sv-draft-item__amount{ font-family:'IBM Plex Mono',monospace !important; font-weight:600 !important; font-size:.85rem; color:var(--lg-ink); letter-spacing:-0.01em; }
+        .sv-draft-item__edit{
+            font-size:.75rem; font-weight:600; color:var(--lg-teal-deep); text-decoration:none; white-space:nowrap;
+        }
+        .sv-draft-item__edit:hover{ color:var(--lg-teal); }
+
+        /* ---------- Top Products list ---------- */
+        .sv-prod-list{ list-style:none; margin:0; padding:0; }
+        .sv-prod-item{ margin-bottom:1rem; }
+        .sv-prod-item:last-child{ margin-bottom:0; }
+        .sv-prod-item__top{
+            display:flex; align-items:center; gap:.5rem; margin-bottom:.4rem;
+        }
+        .sv-prod-item__rank{
+            font-family:'IBM Plex Mono',monospace; font-size:.7rem; font-weight:600;
+            color:var(--lg-teal-deep); background:var(--lg-teal-tint);
+            width:20px; height:20px; border-radius:5px; display:flex; align-items:center; justify-content:center;
+            flex:none;
+        }
+        .sv-prod-item__name{
+            font-size:.85rem; font-weight:500; color:var(--lg-ink);
+            flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        .sv-prod-item__value{
+            font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:.82rem;
+            color:var(--lg-ink); flex:none; letter-spacing:-0.01em;
+        }
+        .sv-prod-item__track{
+            height:6px; background:var(--lg-teal-tint); border-radius:20px; overflow:hidden;
+        }
+        .sv-prod-item__fill{
+            height:100%; background:var(--lg-teal); border-radius:20px; transition:width .3s ease;
+        }
+
+        @media (max-width:767px){
+            .sv-title{ font-size:1.5rem; }
+            .sv-kpi{ flex:1 1 45%; border-bottom:1px solid var(--lg-border); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+    <div th:replace="~{dashboard/fragments/sidebar :: sidebar}"></div>
+    <div th:replace="~{dashboard/fragments/sidebar :: sidebar-overlay}"></div>
+
+    <div class="main-area" id="mainArea">
+
+        <div th:replace="~{dashboard/fragments/topbar :: topbar}"></div>
+
+        <main class="page-content">
+
+            <!-- PAGE HEADER -->
+            <div class="sv-header">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb breadcrumb-erp mb-1">
+                            <li class="breadcrumb-item">
+                                <a th:href="@{/dashboard}"><i class="bi bi-house-door"></i> Dashboard</a>
+                            </li>
+                            <li class="breadcrumb-item active">Sales</li>
+                        </ol>
+                    </nav>
+                    <span class="sv-eyebrow">Statement Overview</span>
+                    <h1 class="sv-title">Sales Dashboard</h1>
+                    <p class="sv-subtitle">Overview of your sales performance</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a th:href="@{/sales/list}" class="sv-btn sv-btn-ghost">
+                        <i class="bi bi-list-ul me-2"></i>All Sales
+                    </a>
+                    <a th:href="@{/sales/add}"
+                       class="sv-btn sv-btn-solid"
+                       sec:authorize="hasAnyRole('SUPER_ADMIN','BUSINESS_OWNER')">
+                        <i class="bi bi-plus-lg me-2"></i>New Sale
+                    </a>
+                </div>
+            </div>
+
+            <!-- ALERTS -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show mb-3">
+                <i class="bi bi-check-circle me-2"></i>
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-3">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- KPI STATEMENT STRIP -->
+            <div class="sv-kpi-strip">
+
+                <div class="sv-kpi">
+                    <p class="sv-kpi__label"><i class="bi bi-receipt"></i>Invoices</p>
+                    <h3 class="sv-kpi__value" th:text="${totalInvoices}">0</h3>
+                    <p class="sv-kpi__sub">All time</p>
+                </div>
+
+                <div class="sv-kpi">
+                    <p class="sv-kpi__label"><i class="bi bi-bag-check"></i>Total Sale</p>
+                    <h3 class="sv-kpi__value"><small>৳</small><span th:text="${#numbers.formatDecimal(totalSale,1,'COMMA',2,'POINT')}">0.00</span></h3>
+                    <p class="sv-kpi__sub">Grand total</p>
+                </div>
+
+                <div class="sv-kpi sv-kpi--paid">
+                    <p class="sv-kpi__label"><i class="bi bi-check2-circle"></i>Total Paid</p>
+                    <h3 class="sv-kpi__value"><small>৳</small><span th:text="${#numbers.formatDecimal(totalPaid,1,'COMMA',2,'POINT')}">0.00</span></h3>
+                    <p class="sv-kpi__sub">Collected</p>
+                </div>
+
+                <div class="sv-kpi sv-kpi--due">
+                    <p class="sv-kpi__label"><i class="bi bi-exclamation-circle"></i>Total Due</p>
+                    <h3 class="sv-kpi__value"><small>৳</small><span th:text="${#numbers.formatDecimal(totalDue,1,'COMMA',2,'POINT')}">0.00</span></h3>
+                    <p class="sv-kpi__sub">Outstanding</p>
+                </div>
+
+                <div class="sv-kpi">
+                    <p class="sv-kpi__label"><i class="bi bi-calendar-month"></i>This Month</p>
+                    <h3 class="sv-kpi__value"><small>৳</small><span th:text="${#numbers.formatDecimal(thisMonthTotal,1,'COMMA',2,'POINT')}">0.00</span></h3>
+                    <p class="sv-kpi__sub">vs last: ৳<span th:text="${#numbers.formatDecimal(lastMonthTotal,1,'COMMA',2,'POINT')}">0.00</span></p>
+                </div>
+
+                <div class="sv-kpi">
+                    <p class="sv-kpi__label"><i class="bi bi-people"></i>Customers</p>
+                    <h3 class="sv-kpi__value" th:text="${totalCustomers}">0</h3>
+                    <p class="sv-kpi__sub">Active</p>
+                </div>
+
+            </div>
+
+            <!-- CHARTS ROW -->
+            <div class="row g-3 mb-3">
+
+                <div class="col-lg-8">
+                    <div class="sv-card">
+                        <div class="sv-card__head">
+                            <div class="sv-card__icon"><i class="bi bi-bar-chart-line"></i></div>
+                            <div>
+                                <h5 class="sv-card__title">Monthly Sales Trend</h5>
+                                <p class="sv-card__subtitle">Last 6 months overview</p>
+                            </div>
+                        </div>
+                        <div class="sv-card__body">
+                            <canvas id="trendChart" style="max-height:220px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="sv-card">
+                        <div class="sv-card__head">
+                            <div class="sv-card__icon"><i class="bi bi-box-seam"></i></div>
+                            <div>
+                                <h5 class="sv-card__title">Top 5 Products</h5>
+                                <p class="sv-card__subtitle">By sales volume</p>
+                            </div>
+                        </div>
+                        <div class="sv-card__body">
+                            <div th:if="${#lists.isEmpty(prodLabels)}" class="sv-empty">
+                                <i class="bi bi-box-seam"></i>
+                                <p>No product sales yet</p>
+                            </div>
+                            <ul th:unless="${#lists.isEmpty(prodLabels)}" class="sv-prod-list">
+                                <li th:each="label, stat : ${prodLabels}" class="sv-prod-item">
+                                    <div class="sv-prod-item__top">
+                                        <span class="sv-prod-item__rank" th:text="${stat.count}">1</span>
+                                        <span class="sv-prod-item__name" th:text="${label}">Product</span>
+                                        <span class="sv-prod-item__value" th:text="${prodValues[stat.index]}">0</span>
+                                    </div>
+                                    <div class="sv-prod-item__track">
+                                        <div class="sv-prod-item__fill"
+                                             th:style="'width:' + (${prodValues[0] != null and prodValues[0] > 0} ? (${prodValues[stat.index] * 100.0 / prodValues[0]}) : 0) + '%'">
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RECENT + DRAFT -->
+            <div class="row g-3 mb-4">
+
+                <!-- Recent Sales -->
+                <div class="col-lg-7">
+                    <div class="sv-card">
+                        <div class="sv-card__head">
+                            <div class="sv-card__icon"><i class="bi bi-clock-history"></i></div>
+                            <div>
+                                <h5 class="sv-card__title">Recent Sales</h5>
+                                <p class="sv-card__subtitle">Latest transactions</p>
+                            </div>
+                            <a th:href="@{/sales/list}" class="sv-link-all">View All <i class="bi bi-arrow-right ms-1"></i></a>
+                        </div>
+                        <div class="sv-card__body p-0">
+                            <div th:if="${#lists.isEmpty(recentSales)}" class="sv-empty">
+                                <i class="bi bi-receipt"></i>
+                                <p>No sales yet</p>
+                            </div>
+                            <div class="table-responsive" th:unless="${#lists.isEmpty(recentSales)}">
+                                <table class="table sv-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Invoice</th>
+                                        <th>Customer</th>
+                                        <th>Date</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="s : ${recentSales}">
+                                        <td>
+                                            <a th:href="@{'/sales/' + ${s.id}}" th:text="${s.invoiceNo}" class="sv-invoice-chip"></a>
+                                        </td>
+                                        <td th:text="${s.customerName != null ? s.customerName : '—'}">—</td>
+                                        <td class="text-muted" th:text="${#temporals.format(s.saleDate,'dd MMM yy')}">—</td>
+                                        <td class="sv-amount">
+                                            ৳<span th:text="${#numbers.formatDecimal(s.grandTotal,1,'COMMA',2,'POINT')}">0</span>
+                                        </td>
+                                        <td>
+                                            <span class="sv-badge"
+                                                  th:class="${s.status.name() == 'COMPLETED'} ? 'sv-badge sv-badge--completed' : (${s.status.name() == 'CANCELLED'} ? 'sv-badge sv-badge--cancelled' : 'sv-badge sv-badge--draft')"
+                                                  th:text="${s.status}">—</span>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Draft Sales -->
+                <div class="col-lg-5">
+                    <div class="sv-card">
+                        <div class="sv-card__head">
+                            <div class="sv-card__icon sv-card__icon--amber"><i class="bi bi-pencil-square"></i></div>
+                            <div>
+                                <h5 class="sv-card__title">Draft Sales</h5>
+                                <p class="sv-card__subtitle">Pending completion</p>
+                            </div>
+                        </div>
+                        <div class="sv-card__body">
+                            <div th:if="${#lists.isEmpty(draftSales)}" class="sv-empty">
+                                <i class="bi bi-pencil"></i>
+                                <p>No drafts pending</p>
+                            </div>
+                            <ul th:unless="${#lists.isEmpty(draftSales)}" class="sv-draft-list">
+                                <li th:each="d : ${draftSales}" class="sv-draft-item">
+                                    <div>
+                                        <span class="sv-draft-item__num" th:text="${d.invoiceNo}">—</span>
+                                        <span class="sv-draft-item__meta"
+                                              th:text="${(d.customerName != null ? d.customerName : 'Walk-in') + ' · ' + #temporals.format(d.saleDate,'dd MMM')}">—</span>
+                                    </div>
+                                    <div class="sv-draft-item__right">
+                                        <span class="sv-draft-item__amount">
+                                            ৳<span th:text="${#numbers.formatDecimal(d.grandTotal,1,'COMMA',2,'POINT')}">0</span>
+                                        </span>
+                                        <a th:href="@{'/sales/' + ${d.id} + '/edit'}"
+                                           class="sv-draft-item__edit"
+                                           sec:authorize="hasAnyRole('SUPER_ADMIN','BUSINESS_OWNER')">
+                                            Edit <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+    <!-- end main-area -->
+
+</div>
+<!-- end app-shell -->
+
+<!-- Chart Data -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const trendLabels = /*[[${trendLabels}]]*/ [];
+    const trendValues = /*[[${trendValues}]]*/ [];
+    /*]]>*/
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/dashboard.js}"></script>
+
+<script>
+    const tickStyle = { color: '#98A2B3', font: { family: 'Inter', size: 11 } };
+    const gridStyle = { color: '#EEF0EF' };
+
+    new Chart(document.getElementById('trendChart'), {
+        type: 'bar',
+        data: {
+            labels: trendLabels,
+            datasets: [{
+                data: trendValues,
+                backgroundColor: 'rgba(14,107,104,0.12)',
+                borderColor: '#0E6B68',
+                borderWidth: 1.5,
+                borderRadius: 6,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { color: gridStyle.color }, ticks: tickStyle },
+                y: {
+                    grid: { color: gridStyle.color },
+                    ticks: { ...tickStyle, callback: v => '৳' + v.toLocaleString() }
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

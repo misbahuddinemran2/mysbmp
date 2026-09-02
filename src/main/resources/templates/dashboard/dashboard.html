@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${businessName ?: 'Dashboard'} + ' — StockFlow ERP'">Dashboard</title>
+
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <div th:replace="~{dashboard/fragments/sidebar :: sidebar}"></div>
+  <div th:replace="~{dashboard/fragments/sidebar :: sidebar-overlay}"></div>
+
+  <!-- MAIN AREA -->
+  <div class="main-area" id="mainArea">
+
+    <!-- TOPBAR -->
+    <div th:replace="~{dashboard/fragments/topbar :: topbar}"></div>
+
+    <main class="page-content" role="main">
+
+      <!-- ── Page Header ── -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle"
+             th:text="'Welcome back! ' + ${businessName ?: ''} + ' — Here\'s your overview.'">
+            Welcome back!
+          </p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="page-date">
+            <i class="bi bi-calendar3 me-1"></i>
+            <span id="currentDate"></span>
+          </span>
+          <a th:href="@{/sales/add}" class="btn-sm-primary">
+            <i class="bi bi-plus-lg"></i> New Sale
+          </a>
+        </div>
+      </div>
+
+      <!-- ROW 1 — 4 KPI STAT CARDS -->
+      <div class="row g-3 mb-4">
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-card-icon blue"><i class="bi bi-receipt"></i></div>
+            </div>
+            <div>
+              <div class="stat-card-value"
+                   th:text="'৳ ' + ${#numbers.formatInteger(thisMonthSale ?: 0, 1, 'COMMA')}">৳ 0</div>
+              <div class="stat-card-label">This Month Sales</div>
+            </div>
+            <div th:classappend="${saleTrendPct != null and #strings.startsWith(saleTrendPct, '+')} ? 'up' : 'down'"
+                 class="stat-card-trend">
+              <i th:classappend="${saleTrendPct != null and #strings.startsWith(saleTrendPct, '+')} ? 'bi-arrow-up-right-circle-fill' : 'bi-arrow-down-right-circle-fill'"
+                 class="bi"></i>
+              <span th:text="${saleTrendPct ?: '0%'}">0%</span>
+              <span class="stat-card-trend-text">vs last month</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-card-icon green"><i class="bi bi-cart-plus"></i></div>
+            </div>
+            <div>
+              <div class="stat-card-value"
+                   th:text="'৳ ' + ${#numbers.formatInteger(totalPurchase ?: 0, 1, 'COMMA')}">৳ 0</div>
+              <div class="stat-card-label">Total Purchase</div>
+            </div>
+            <div class="stat-card-trend up">
+              <i class="bi bi-box-seam-fill"></i>
+              <span th:text="${totalPurchaseInvoices ?: 0}">0</span>
+              <span class="stat-card-trend-text">purchase orders</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-card-icon cyan"><i class="bi bi-boxes"></i></div>
+            </div>
+            <div>
+              <div class="stat-card-value" th:text="${totalProducts ?: 0}">0</div>
+              <div class="stat-card-label">Total Products</div>
+            </div>
+            <div class="stat-card-trend up">
+              <i class="bi bi-tag-fill"></i>
+              <span th:text="${totalCategories ?: 0}">0</span>
+              <span class="stat-card-trend-text">categories</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-card-icon red"><i class="bi bi-exclamation-triangle"></i></div>
+            </div>
+            <div>
+              <div class="stat-card-value" th:text="${lowStockCount ?: 0}">0</div>
+              <div class="stat-card-label">Low Stock Alerts</div>
+            </div>
+            <div class="stat-card-trend down">
+              <i class="bi bi-exclamation-circle-fill"></i>
+              <span th:text="${outOfStockCount ?: 0}">0</span>
+              <span class="stat-card-trend-text">out of stock</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /row 1 -->
+
+      <!-- ROW 2 — Summary Cards -->
+      <div class="row g-3 mb-4">
+
+        <div class="col-12 col-md-6 col-xl-3">
+          <div class="section-card">
+            <div class="section-card-header">
+              <div class="section-card-title"><i class="bi bi-receipt"></i> Sales Summary</div>
+            </div>
+            <div class="section-card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span style="font-size:0.8rem;color:var(--text-secondary);">Total Invoices</span>
+                <span class="fw-600" th:text="${totalInvoices ?: 0}">0</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span style="font-size:0.8rem;color:var(--text-secondary);">Total Amount</span>
+                <span class="fw-600 amount-cell"
+                      th:text="'৳ ' + ${#numbers.formatInteger(totalSale ?: 0, 1, 'COMMA')}">৳ 0</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span style="font-size:0.8rem;color:var(--success);">Collected</span>
+                <span class="fw-600" style="color:var(--success);"
+                      th:text="'৳ ' + ${#numbers.formatInteger(totalSalePaid ?: 0, 1, 'COMMA')}">৳ 0</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span style="font-size:0.8rem;color:var(--danger);">Due</span>
+                <span class="fw-600" style="color:var(--danger);"
+                      th:text="'৳ ' + ${#numbers.formatInteger(totalSaleDue ?: 0, 1, 'COMMA')}">৳ 0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+          <div class="section-card">
+            <div class="section-card-header">
+              <div class="section-card-title"><i class="bi bi-cart-plus"></i> Purchase Summary</div>
+            </div>
+            <div class="section-card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span style="font-size:0.8rem;color:var(--text-secondary);">Total Orders</span>
+                <span class="fw-600" th:text="${totalPurchaseInvoices ?: 0}">0</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span style="font-size:0.8rem;color:var(--text-secondary);">Total Amount</span>
+                <span class="fw-600 amount-cell"
+                      th:text="'৳ ' + ${#numbers.formatInteger(totalPurchase ?: 0, 1, 'COMMA')}">৳ 0</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span style="font-size:0.8rem;color:var(--success);">Paid</span>
+                <span class="fw-600" style="color:var(--success);"
+                      th:text="'৳ ' + ${#numbers.formatInteger(totalPurchasePaid ?: 0, 1, 'COMMA')}">৳ 0</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span style="font-size:0.8rem;color:var(--danger);">Due</span>
+                <span class="fw-600" style="color:var(--danger);"
+                      th:text="'৳ ' + ${#numbers.formatInteger(totalPurchaseDue ?: 0, 1, 'COMMA')}">৳ 0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+          <div class="section-card">
+            <div class="section-card-header">
+              <div class="section-card-title"><i class="bi bi-archive"></i> Stock Summary</div>
+            </div>
+            <div class="section-card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span style="font-size:0.8rem;color:var(--text-secondary);">Stock Value</span>
+                <span class="fw-600 amount-cell"
+                      th:text="'৳ ' + ${#numbers.formatInteger(totalStockValue ?: 0, 1, 'COMMA')}">৳ 0</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span style="font-size:0.8rem;color:var(--text-secondary);">Products</span>
+                <span class="fw-600" th:text="${totalProducts ?: 0}">0</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span style="font-size:0.8rem;color:var(--warning);">Low Stock</span>
+                <span class="fw-600" style="color:var(--warning);" th:text="${lowStockCount ?: 0}">0</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span style="font-size:0.8rem;color:var(--danger);">Out of Stock</span>
+                <span class="fw-600" style="color:var(--danger);" th:text="${outOfStockCount ?: 0}">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+          <div class="section-card h-100">
+            <div class="section-card-header">
+              <div class="section-card-title"><i class="bi bi-lightning-charge"></i> Quick Actions</div>
+            </div>
+            <div class="section-card-body">
+              <div class="quick-actions-grid">
+
+                <button class="quick-action-btn" onclick="window.location.href='/sales/add'">
+                  <div class="quick-action-icon" style="background:var(--primary-light);">
+                    <i class="bi bi-plus-circle" style="color:var(--primary);"></i>
+                  </div>
+                  <span class="quick-action-label">New Sale</span>
+                </button>
+
+                <button class="quick-action-btn" onclick="window.location.href='/inventory/purchase/new'">
+                  <div class="quick-action-icon" style="background:var(--success-light);">
+                    <i class="bi bi-cart-plus" style="color:var(--success);"></i>
+                  </div>
+                  <span class="quick-action-label">New Purchase</span>
+                </button>
+
+                <button class="quick-action-btn" onclick="window.location.href='/inventory/product/add'">
+                  <div class="quick-action-icon" style="background:var(--info-light);">
+                    <i class="bi bi-bag-plus" style="color:var(--info);"></i>
+                  </div>
+                  <span class="quick-action-label">Add Product</span>
+                </button>
+
+                <button class="quick-action-btn" onclick="window.location.href='/customers/add'">
+                  <div class="quick-action-icon" style="background:var(--warning-light);">
+                    <i class="bi bi-person-plus" style="color:var(--warning);"></i>
+                  </div>
+                  <span class="quick-action-label">Add Customer</span>
+                </button>
+
+                <button class="quick-action-btn" onclick="window.location.href='/inventory/stock'">
+                  <div class="quick-action-icon" style="background:var(--danger-light);">
+                    <i class="bi bi-exclamation-circle" style="color:var(--danger);"></i>
+                  </div>
+                  <span class="quick-action-label">View Stock</span>
+                </button>
+
+                <button class="quick-action-btn" onclick="window.location.href='/inventory/supplier'">
+                  <div class="quick-action-icon" style="background:#F3E8FF;">
+                    <i class="bi bi-truck" style="color:#9333EA;"></i>
+                  </div>
+                  <span class="quick-action-label">Suppliers</span>
+                </button>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /row 2 -->
+
+      <!-- ROW 3 — Recent Sales + Recent Purchases -->
+      <div class="row g-3 mb-3">
+
+        <!-- Recent Sales -->
+        <div class="col-12 col-xl-6">
+          <div class="section-card">
+            <div class="section-card-header">
+              <div class="section-card-title"><i class="bi bi-receipt"></i> Recent Sales</div>
+              <div class="section-card-actions">
+                <a th:href="@{/sales/list}" class="btn-sm-outline">View all <i class="bi bi-arrow-right"></i></a>
+              </div>
+            </div>
+            <div class="section-card-body">
+
+              <div th:if="${recentSales == null or recentSales.isEmpty()}"
+                   class="text-center py-4 text-muted">
+                <i class="bi bi-receipt" style="font-size:2rem;"></i>
+                <p class="mt-2 mb-0" style="font-size:0.83rem;">No sales yet.</p>
+              </div>
+
+              <div class="table-responsive-wrapper"
+                   th:unless="${recentSales == null or recentSales.isEmpty()}">
+                <table class="data-table">
+                  <thead>
+                  <tr><th>Customer</th><th>Invoice</th><th>Amount</th><th>Status</th></tr>
+                  </thead>
+                  <tbody>
+                  <tr th:each="sale : ${recentSales}">
+                    <td>
+                      <div class="customer-cell">
+                        <div class="customer-avatar"
+                             th:text="${sale.customerName != null and #strings.length(sale.customerName) >= 2}
+                                       ? ${#strings.toUpperCase(#strings.substring(sale.customerName, 0, 2))}
+                                       : 'WI'">WI</div>
+                        <div>
+                          <div class="customer-name" th:text="${sale.customerName ?: 'Walk-in'}">Walk-in</div>
+                          <div class="customer-id" th:text="${sale.invoiceNo}">—</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <a th:href="@{/sales/{id}(id=${sale.id})}"
+                         style="color:var(--primary);text-decoration:none;font-weight:600;"
+                         th:text="${sale.invoiceNo}">—</a>
+                    </td>
+                    <td>
+                      <span class="amount-cell"
+                            th:text="'৳ ' + ${#numbers.formatInteger(sale.grandTotal ?: 0, 1, 'COMMA')}">৳ 0</span>
+                    </td>
+                    <td>
+                      <span th:classappend="${sale.status?.name() == 'COMPLETED'} ? 'paid'     :
+                                            (${sale.status?.name() == 'DRAFT'}     ? 'pending'  :
+                                            (${sale.status?.name() == 'CANCELLED'} ? 'failed'   : 'pending'))"
+                            class="badge-status" th:text="${sale.status}">—</span>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Purchases -->
+        <div class="col-12 col-xl-6">
+          <div class="section-card">
+            <div class="section-card-header">
+              <div class="section-card-title"><i class="bi bi-cart-plus"></i> Recent Purchases</div>
+              <div class="section-card-actions">
+                <a th:href="@{/inventory/purchase/list}" class="btn-sm-outline">View all <i class="bi bi-arrow-right"></i></a>
+              </div>
+            </div>
+            <div class="section-card-body">
+
+              <div th:if="${recentPurchases == null or recentPurchases.isEmpty()}"
+                   class="text-center py-4 text-muted">
+                <i class="bi bi-cart-plus" style="font-size:2rem;"></i>
+                <p class="mt-2 mb-0" style="font-size:0.83rem;">No purchases yet.</p>
+              </div>
+
+              <div class="table-responsive-wrapper"
+                   th:unless="${recentPurchases == null or recentPurchases.isEmpty()}">
+                <table class="data-table">
+                  <thead>
+                  <tr><th>Supplier</th><th>Invoice</th><th>Amount</th><th>Status</th></tr>
+                  </thead>
+                  <tbody>
+                  <tr th:each="p : ${recentPurchases}">
+                    <td>
+                      <div class="customer-cell">
+                        <div class="customer-avatar"
+                             style="background:var(--success-light);color:var(--success);"
+                             th:text="${p.supplier?.supplierName != null and #strings.length(p.supplier.supplierName) >= 2}
+                                       ? ${#strings.toUpperCase(#strings.substring(p.supplier.supplierName, 0, 2))}
+                                       : 'SU'">SU</div>
+                        <div>
+                          <div class="customer-name" th:text="${p.supplier?.supplierName ?: '—'}">—</div>
+                          <div class="customer-id" th:text="${p.supplier?.companyName ?: ''}"></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <a th:href="@{/inventory/purchase/{id}(id=${p.id})}"
+                         style="color:var(--primary);text-decoration:none;font-weight:600;"
+                         th:text="${p.purchaseNumber}">—</a>
+                    </td>
+                    <td>
+                      <span class="amount-cell"
+                            th:text="'৳ ' + ${#numbers.formatInteger(p.grandTotal ?: 0, 1, 'COMMA')}">৳ 0</span>
+                    </td>
+                    <td>
+                      <span th:classappend="${p.status?.name() == 'COMPLETED'} ? 'paid'     :
+                                            (${p.status?.name() == 'DRAFT'}     ? 'pending'  :
+                                            (${p.status?.name() == 'CANCELLED'} ? 'failed'   : 'pending'))"
+                            class="badge-status" th:text="${p.status}">—</span>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /row 3 -->
+
+      <!-- ROW 2.5 — Sales & Purchase Overview -->
+      <div class="chart-row mb-4">
+
+        <!-- Monthly Sales Trend (simple bar list) -->
+        <div class="section-card chart-wide">
+          <div class="section-card-header">
+            <div class="section-card-title"><i class="bi bi-graph-up"></i> Monthly Sales Trend</div>
+            <span class="card-sub" style="font-size:0.76rem;color:var(--text-muted);">Last 6 months</span>
+          </div>
+          <div class="chart-card-body">
+
+            <div th:if="${trendLabels == null or trendLabels.isEmpty()}"
+                 class="text-center py-4 text-muted">
+              <i class="bi bi-graph-up" style="font-size:2rem;"></i>
+              <p class="mt-2 mb-0" style="font-size:0.83rem;">No sales data yet.</p>
+            </div>
+
+            <div th:unless="${trendLabels == null or trendLabels.isEmpty()}"
+                 th:with="maxVal=${trendMaxValue}"
+                 style="display:flex;flex-direction:column;gap:12px;">
+              <div th:each="month, iter : ${trendLabels}"
+                   style="display:flex;align-items:center;gap:10px;">
+                <span style="width:60px;font-size:0.8rem;color:var(--text-secondary);flex-shrink:0;"
+                      th:text="${month}">Month</span>
+                <div style="flex:1;background:var(--bg-surface);border-radius:4px;height:22px;">
+                  <div style="height:100%;border-radius:4px;background:#2a78d6;"
+                       th:style="'width:' + ${maxVal == null or maxVal.doubleValue() == 0 ? 0 :
+                                 (trendValues[iter.index].doubleValue() / maxVal.doubleValue()) * 100} + '%'">
+                  </div>
+                </div>
+                <span style="width:100px;text-align:right;font-size:0.8rem;font-weight:600;"
+                      th:text="'৳ ' + ${#numbers.formatInteger(trendValues[iter.index] ?: 0, 1, 'COMMA')}">৳ 0</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Payment Method Split (simple bar list) -->
+        <div class="section-card">
+          <div class="section-card-header">
+            <div class="section-card-title"><i class="bi bi-pie-chart"></i> Payment Methods</div>
+          </div>
+          <div class="chart-card-body">
+
+            <div th:if="${paymentLabels == null or paymentLabels.isEmpty()}"
+                 class="text-center py-4 text-muted">
+              <i class="bi bi-pie-chart" style="font-size:2rem;"></i>
+              <p class="mt-2 mb-0" style="font-size:0.83rem;">No payment data yet.</p>
+            </div>
+
+            <div th:unless="${paymentLabels == null or paymentLabels.isEmpty()}"
+                 th:with="payMax=${paymentMaxValue}"
+                 style="display:flex;flex-direction:column;gap:12px;">
+              <div th:each="method, iter : ${paymentLabels}"
+                   style="display:flex;align-items:center;gap:10px;">
+                <span style="width:110px;font-size:0.8rem;color:var(--text-secondary);
+                             flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                      th:text="${method}">Method</span>
+                <div style="flex:1;background:var(--bg-surface);border-radius:4px;height:22px;">
+                  <div style="height:100%;border-radius:4px;background:#7f77dd;"
+                       th:style="'width:' + ${payMax == null or payMax.doubleValue() == 0 ? 0 :
+                                 (paymentValues[iter.index].doubleValue() / payMax.doubleValue()) * 100} + '%'">
+                  </div>
+                </div>
+                <span style="width:90px;text-align:right;font-size:0.8rem;font-weight:600;"
+                      th:text="'৳ ' + ${#numbers.formatInteger(paymentValues[iter.index] ?: 0, 1, 'COMMA')}">৳ 0</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+      <div class="chart-row mb-4">
+
+        <!-- Top Customers (simple ranked bar list) -->
+        <div class="section-card">
+          <div class="section-card-header">
+            <div class="section-card-title">
+              <i class="bi bi-people"></i> Top Customers
+            </div>
+          </div>
+          <div class="chart-card-body">
+
+            <div th:if="${topCustomerLabels == null or topCustomerLabels.isEmpty()}"
+                 class="text-center py-4 text-muted">
+              <i class="bi bi-people" style="font-size:2rem;"></i>
+              <p class="mt-2 mb-0" style="font-size:0.83rem;">No customer data yet.</p>
+            </div>
+
+            <div th:unless="${topCustomerLabels == null or topCustomerLabels.isEmpty()}"
+                 style="display:flex;flex-direction:column;gap:12px;">
+              <div th:each="name, iter : ${topCustomerLabels}"
+                   style="display:flex;align-items:center;gap:10px;">
+                <span style="width:110px;font-size:0.8rem;color:var(--text-secondary);
+                             flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                      th:text="${name}">Customer</span>
+                <div style="flex:1;background:var(--bg-surface);border-radius:4px;height:22px;">
+                  <div style="height:100%;border-radius:4px;background:#2a78d6;"
+                       th:style="'width:' + ${topCustomerValues[0].doubleValue() == 0 ? 0 :
+                                 (topCustomerValues[iter.index].doubleValue() / topCustomerValues[0].doubleValue()) * 100} + '%'">
+                  </div>
+                </div>
+                <span style="width:90px;text-align:right;font-size:0.8rem;font-weight:600;"
+                      th:text="'৳ ' + ${#numbers.formatInteger(topCustomerValues[iter.index] ?: 0, 1, 'COMMA')}">৳ 0</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Top Products (simple ranked bar list) -->
+        <div class="section-card">
+          <div class="section-card-header">
+            <div class="section-card-title">
+              <i class="bi bi-bar-chart"></i> Top Selling Products
+            </div>
+          </div>
+          <div class="chart-card-body">
+
+            <div th:if="${topProductLabels == null or topProductLabels.isEmpty()}"
+                 class="text-center py-4 text-muted">
+              <i class="bi bi-bar-chart" style="font-size:2rem;"></i>
+              <p class="mt-2 mb-0" style="font-size:0.83rem;">No product data yet.</p>
+            </div>
+
+            <div th:unless="${topProductLabels == null or topProductLabels.isEmpty()}"
+                 style="display:flex;flex-direction:column;gap:12px;">
+              <div th:each="name, iter : ${topProductLabels}"
+                   style="display:flex;align-items:center;gap:10px;">
+                <span style="width:110px;font-size:0.8rem;color:var(--text-secondary);
+                             flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                      th:text="${name}">Product</span>
+                <div style="flex:1;background:var(--bg-surface);border-radius:4px;height:22px;">
+                  <div style="height:100%;border-radius:4px;background:#1baf7a;"
+                       th:style="'width:' + ${topProductValues[0] == 0 ? 0 :
+                                 (topProductValues[iter.index] * 100.0 / topProductValues[0])} + '%'">
+                  </div>
+                </div>
+                <span style="width:90px;text-align:right;font-size:0.8rem;font-weight:600;"
+                      th:text="${topProductValues[iter.index] ?: 0} + ' units'">0 units</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /chart rows -->
+
+      <!-- ROW 4 — Low Stock Products -->
+      <div class="row g-3" th:if="${lowStocks != null and !lowStocks.isEmpty()}">
+        <div class="col-12">
+          <div class="section-card">
+            <div class="section-card-header">
+              <div class="section-card-title" style="color:var(--danger);">
+                <i class="bi bi-exclamation-triangle"></i> Low Stock Alert
+              </div>
+              <div class="section-card-actions">
+                <a th:href="@{/inventory/stock}" class="btn-sm-outline"><i class="bi bi-archive"></i> Manage Stock</a>
+                <a th:href="@{/inventory/purchase/new}" class="btn-sm-primary"><i class="bi bi-cart-plus"></i> New Purchase</a>
+              </div>
+            </div>
+            <div class="section-card-body">
+              <div class="table-responsive-wrapper">
+                <table class="data-table">
+                  <thead>
+                  <tr>
+                    <th>Product</th><th>Category</th><th>SKU</th>
+                    <th>Current Stock</th><th>Min. Required</th><th>Status</th><th>Action</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr th:each="stock : ${lowStocks}">
+                    <td>
+                      <div class="product-cell">
+                        <div class="product-thumb">📦</div>
+                        <div>
+                          <div class="fw-600" style="color:var(--text-primary);font-size:0.875rem;"
+                               th:text="${stock.product?.name ?: '—'}">—</div>
+                          <div style="font-size:0.75rem;color:var(--text-muted);"
+                               th:text="${stock.product?.unit ?: ''}"></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span class="color-muted" th:text="${stock.product?.category?.name ?: '—'}">—</span></td>
+                    <td>
+                      <code style="font-size:0.78rem;background:var(--bg-surface);padding:2px 6px;border-radius:4px;"
+                            th:text="${stock.product?.sku ?: '—'}">—</code>
+                    </td>
+                    <td>
+                      <span class="fw-600"
+                            th:style="${stock.outOfStock} ? 'color:var(--danger)' : 'color:var(--warning)'"
+                            th:text="${stock.currentQuantity} + ' ' + (${stock.unit ?: 'pcs'})">0</span>
+                    </td>
+                    <td>
+                      <span class="color-muted"
+                            th:text="${stock.minimumStockAlert} + ' ' + (${stock.unit ?: 'pcs'})">—</span>
+                    </td>
+                    <td>
+                      <span th:if="${stock.outOfStock}" class="stock-badge critical">Out of Stock</span>
+                      <span th:unless="${stock.outOfStock}" class="stock-badge low">Low Stock</span>
+                    </td>
+                    <td>
+                      <a th:href="@{/inventory/purchase/new}" class="btn-sm-primary"
+                         style="padding:4px 10px;font-size:0.75rem;text-decoration:none;">
+                        <i class="bi bi-cart-plus"></i> Restock
+                      </a>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /row 4 -->
+
+    </main>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script th:src="@{/js/dashboard.js}"></script>
+<script>
+  (function () {
+    var el = document.getElementById('currentDate');
+    if (el) {
+      el.textContent = new Date().toLocaleDateString('en-GB', {
+        weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+      });
+    }
+  })();
+</script>
+</body>
+</html>

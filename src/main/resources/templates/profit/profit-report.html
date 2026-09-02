@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profit &amp; Loss | StockFlow ERP</title>
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
+</head>
+
+<body>
+<div class="app-shell">
+
+  <div th:replace="~{dashboard/fragments/sidebar :: sidebar}"></div>
+  <div th:replace="~{dashboard/fragments/sidebar :: sidebar-overlay}"></div>
+
+  <div class="main-area" id="mainArea">
+    <div th:replace="~{dashboard/fragments/topbar :: topbar}"></div>
+
+    <main class="page-content" role="main">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Profit &amp; Loss</h1>
+          <p class="page-subtitle">See how much you're really earning, after cost and expenses</p>
+        </div>
+      </div>
+
+      <!-- Period Filter -->
+      <div class="section-card mb-4">
+        <div class="section-card-body" style="padding:16px 20px;">
+          <div class="d-flex flex-wrap align-items-center gap-2">
+
+            <a th:href="@{/profit(period='TODAY')}"
+               th:classappend="${period == 'TODAY'} ? 'btn-sm-primary' : 'btn-sm-outline'"
+               style="text-decoration:none;">Today</a>
+
+            <a th:href="@{/profit(period='WEEK')}"
+               th:classappend="${period == 'WEEK'} ? 'btn-sm-primary' : 'btn-sm-outline'"
+               style="text-decoration:none;">This Week</a>
+
+            <a th:href="@{/profit(period='MONTH')}"
+               th:classappend="${period == 'MONTH'} ? 'btn-sm-primary' : 'btn-sm-outline'"
+               style="text-decoration:none;">This Month</a>
+
+            <a th:href="@{/profit(period='OVERALL')}"
+               th:classappend="${period == 'OVERALL'} ? 'btn-sm-primary' : 'btn-sm-outline'"
+               style="text-decoration:none;">Overall</a>
+
+            <span style="width:1px;height:22px;background:var(--border-color,#e5e7eb);margin:0 4px;"></span>
+
+            <form method="get" th:action="@{/profit}" class="d-flex align-items-center gap-2">
+              <input type="date" name="from" th:value="${fromDate}" class="form-control form-control-sm" style="width:150px;">
+              <span style="font-size:0.8rem;color:var(--text-muted);">to</span>
+              <input type="date" name="to" th:value="${toDate}" class="form-control form-control-sm" style="width:150px;">
+              <button type="submit" class="btn-sm-outline"><i class="bi bi-funnel"></i> Apply</button>
+            </form>
+
+            <span class="ms-auto" style="font-size:0.8rem;color:var(--text-muted);">
+              <i class="bi bi-calendar3"></i>
+              <span th:text="${#temporals.format(fromDate, 'dd MMM yyyy')}"></span> —
+              <span th:text="${#temporals.format(toDate, 'dd MMM yyyy')}"></span>
+            </span>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Gross Profit KPI Cards -->
+      <div class="row g-3 mb-3">
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-card-icon blue"><i class="bi bi-graph-up-arrow"></i></div>
+            </div>
+            <div>
+              <div class="stat-card-value"
+                   th:text="'৳ ' + ${#numbers.formatInteger(summary.totalRevenue ?: 0, 1, 'COMMA')}">৳ 0</div>
+              <div class="stat-card-label">Total Revenue</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-card-icon warning"><i class="bi bi-box-seam"></i></div>
+            </div>
+            <div>
+              <div class="stat-card-value"
+                   th:text="'৳ ' + ${#numbers.formatInteger(summary.totalCost ?: 0, 1, 'COMMA')}">৳ 0</div>
+              <div class="stat-card-label">Cost of Goods Sold</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-card-icon green"><i class="bi bi-cash-stack"></i></div>
+            </div>
+            <div>
+              <div class="stat-card-value" style="color:var(--success);"
+                   th:text="'৳ ' + ${#numbers.formatInteger(summary.grossProfit ?: 0, 1, 'COMMA')}">৳ 0</div>
+              <div class="stat-card-label">Gross Profit</div>
+            </div>
+            <div class="stat-card-trend up">
+              <span th:text="${summary.grossMarginPct} + '% margin'">0% margin</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <div class="stat-card-icon red"><i class="bi bi-wallet2"></i></div>
+            </div>
+            <div>
+              <div class="stat-card-value" style="color:var(--danger);"
+                   th:text="'৳ ' + ${#numbers.formatInteger(summary.totalExpense ?: 0, 1, 'COMMA')}">৳ 0</div>
+              <div class="stat-card-label">Total Expense</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Net Profit — highlighted card -->
+      <div class="section-card mb-4">
+        <div class="section-card-body"
+             th:style="${summary.netProfit != null and summary.netProfit.doubleValue() >= 0}
+                        ? 'background:linear-gradient(135deg,#e8f9f1,#ffffff);'
+                        : 'background:linear-gradient(135deg,#fdeaea,#ffffff);'">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+              <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.03em;">
+                Net Profit <span style="font-weight:400;">(Gross Profit − Expense)</span>
+              </div>
+              <div style="font-size:2.1rem;font-weight:800;"
+                   th:style="${summary.netProfit != null and summary.netProfit.doubleValue() >= 0} ? 'color:var(--success);' : 'color:var(--danger);'"
+                   th:text="'৳ ' + ${#numbers.formatInteger(summary.netProfit ?: 0, 1, 'COMMA')}">৳ 0</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:0.85rem;color:var(--text-muted);">Net Margin</div>
+              <div style="font-size:1.3rem;font-weight:700;"
+                   th:text="${summary.netMarginPct} + '%'">0%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product-wise Profit -->
+      <div class="section-card">
+        <div class="section-card-header">
+          <div class="section-card-title"><i class="bi bi-boxes"></i> Product-wise Profit / Loss</div>
+        </div>
+        <div class="section-card-body">
+
+          <div th:if="${productProfits == null or productProfits.isEmpty()}"
+               class="text-center py-4 text-muted">
+            <i class="bi bi-boxes" style="font-size:2rem;"></i>
+            <p class="mt-2 mb-0" style="font-size:0.9rem;">No sales in this period.</p>
+          </div>
+
+          <div class="table-responsive-wrapper" th:unless="${productProfits == null or productProfits.isEmpty()}">
+            <table class="data-table">
+              <thead>
+              <tr>
+                <th>Product</th>
+                <th>Qty Sold</th>
+                <th>Revenue</th>
+                <th>Cost</th>
+                <th>Profit / Loss</th>
+                <th>Margin</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="pp : ${productProfits}">
+                <td><span class="fw-600" th:text="${pp.productName}">—</span></td>
+                <td th:text="${pp.quantitySold}">0</td>
+                <td><span class="amount-cell" th:text="'৳ ' + ${#numbers.formatInteger(pp.revenue ?: 0, 1, 'COMMA')}">৳ 0</span></td>
+                <td><span class="color-muted" th:text="'৳ ' + ${#numbers.formatInteger(pp.cost ?: 0, 1, 'COMMA')}">৳ 0</span></td>
+                <td>
+                  <span th:style="${pp.profit != null and pp.profit.doubleValue() >= 0} ? 'color:var(--success);font-weight:700;' : 'color:var(--danger);font-weight:700;'"
+                        th:text="'৳ ' + ${#numbers.formatInteger(pp.profit ?: 0, 1, 'COMMA')}">৳ 0</span>
+                </td>
+                <td>
+                  <span th:classappend="${pp.profit != null and pp.profit.doubleValue() >= 0} ? 'paid' : 'failed'"
+                        class="badge-status"
+                        th:text="${pp.profitMarginPct} + '%'">0%</span>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
