@@ -113,19 +113,19 @@ public interface SaleRepository
     );
 
     // ─────────────────────────────────────────────
-    // Chart data — Dashboard (native query, MySQL)
+    // Chart data — Dashboard (native query, PostgreSQL)
     // ─────────────────────────────────────────────
 
     @Query(
             value = """
-            SELECT DATE_FORMAT(s.sale_date, '%b') AS label,
+            SELECT TO_CHAR(s.sale_date, 'Mon') AS label,
                    COALESCE(SUM(s.grand_total), 0) AS total
             FROM sales s
             WHERE s.business_id = :businessId
             AND s.status <> 'CANCELLED'
             AND s.sale_date >= :fromDate
-            GROUP BY DATE_FORMAT(s.sale_date, '%b'), MONTH(s.sale_date)
-            ORDER BY MONTH(s.sale_date)
+            GROUP BY TO_CHAR(s.sale_date, 'Mon'), EXTRACT(MONTH FROM s.sale_date)
+            ORDER BY EXTRACT(MONTH FROM s.sale_date)
             """,
             nativeQuery = true
     )
