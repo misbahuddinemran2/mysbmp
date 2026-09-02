@@ -41,15 +41,15 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
 
     // Monthly Purchase Trend (last 6 months)
     @Query("""
-        SELECT FUNCTION('MONTH', p.purchaseDate),
-               FUNCTION('YEAR', p.purchaseDate),
+        SELECT EXTRACT(MONTH FROM p.purchaseDate),
+               EXTRACT(YEAR FROM p.purchaseDate),
                COALESCE(SUM(p.grandTotal), 0)
         FROM Purchase p
         WHERE p.business.id = :businessId
         AND p.status = com.sbmp.inventory.purchase.entity.Purchase.PurchaseStatus.COMPLETED
         AND p.purchaseDate >= :fromDate
-        GROUP BY FUNCTION('YEAR', p.purchaseDate), FUNCTION('MONTH', p.purchaseDate)
-        ORDER BY FUNCTION('YEAR', p.purchaseDate), FUNCTION('MONTH', p.purchaseDate)
+        GROUP BY EXTRACT(YEAR FROM p.purchaseDate), EXTRACT(MONTH FROM p.purchaseDate)
+        ORDER BY EXTRACT(YEAR FROM p.purchaseDate), EXTRACT(MONTH FROM p.purchaseDate)
         """)
     List<Object[]> getMonthlyPurchaseTrend(
             @Param("businessId") Long businessId,
