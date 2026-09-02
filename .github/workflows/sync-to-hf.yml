@@ -1,7 +1,7 @@
 name: Sync to Hugging Face Space
 on:
   push:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
 jobs:
   sync-to-hub:
@@ -13,4 +13,4 @@ jobs:
       - name: Push to HF Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push -f https://sbmp:$HF_TOKEN@huggingface.co/spaces/sbmp/mysbmp master:main
+        run: git push -f https://sbmp:$HF_TOKEN@huggingface.co/spaces/sbmp/mysbmp main:main
