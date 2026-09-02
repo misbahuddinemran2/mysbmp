@@ -26,12 +26,7 @@
 
     <dependencies>
 
-        <!-- WEB -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc</artifactId>
-        </dependency>
-
+       
         <!-- THYMELEAF -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
