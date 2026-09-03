@@ -144,7 +144,7 @@ public class PurchaseController {
         model.addAttribute("draftInvoices",    draftInvoices);
         model.addAttribute("lowStockProducts", lowStockProducts);
 
-        return "inventory/Purchase/dashboard";
+        return "inventory/purchase/dashboard";
     }
 
     // ─────────────────────────────────────────────
@@ -169,7 +169,7 @@ public class PurchaseController {
                 )
         );
 
-        return "inventory/Purchase/list";
+        return "inventory/purchase/list";
     }
 
     // ─────────────────────────────────────────────
@@ -179,7 +179,7 @@ public class PurchaseController {
     public String viewPurchase(@PathVariable Long id, Model model, RedirectAttributes ra) {
         try {
             model.addAttribute("purchase", purchaseService.getPurchaseById(id));
-            return "inventory/Purchase/view";
+            return "inventory/purchase/view";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Purchase not found: " + e.getMessage());
             return "redirect:/inventory/purchase/list";
@@ -240,7 +240,7 @@ public class PurchaseController {
                     productRepository.findByBusiness(business)
             );
 
-            return "inventory/Purchase/edit";
+            return "inventory/purchase/edit";
 
         } catch (Exception e) {
 
@@ -343,7 +343,7 @@ public class PurchaseController {
         model.addAttribute("categories", categories);
         model.addAttribute("products", products);
 
-        return "inventory/Purchase/form";
+        return "inventory/purchase/form";
     }
 
     // ─────────────────────────────────────────────
@@ -411,4 +411,3 @@ public class PurchaseController {
         return user.getBusiness();
     }
 }
-
