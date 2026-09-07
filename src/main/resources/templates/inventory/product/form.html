@@ -26,6 +26,8 @@
   <link rel="stylesheet"
         th:href="@{/css/product.css}">
 
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
 </head>
 
 <body class="eloan-body">
@@ -214,11 +216,52 @@
 
                   </label>
 
-                  <input type="text"
-                         id="barcode"
-                         class="form-control form-control-eloan"
-                         th:field="*{barcode}"
-                         placeholder="Barcode"/>
+                  <div class="input-group">
+
+                    <input type="text"
+                           id="barcode"
+                           class="form-control form-control-eloan"
+                           th:field="*{barcode}"
+                           placeholder="Scan or Generate barcode"
+                           autocomplete="off"/>
+
+                    <button type="button"
+                            id="generateBarcodeBtn"
+                            class="btn btn-outline-secondary">
+
+                      <i class="bi bi-magic"></i>
+                      Generate
+
+                    </button>
+
+                  </div>
+
+                  <div class="form-text">
+                    Scan a barcode using your scanner, or click Generate
+                    to create a new unique code.
+                  </div>
+
+                  <!-- Barcode preview -->
+                  <div id="barcodePreviewWrap"
+                       class="mt-2"
+                       style="display:none;">
+
+                    <svg id="barcodePreview"></svg>
+
+                    <div>
+
+                      <button type="button"
+                              id="printBarcodeBtn"
+                              class="btn btn-sm btn-outline-primary">
+
+                        <i class="bi bi-printer me-1"></i>
+                        Print Label
+
+                      </button>
+
+                    </div>
+
+                  </div>
 
                 </div>
 
@@ -514,5 +557,135 @@
 <script th:src="@{/js/product.js}"></script>
 <script th:src="@{/js/dashboard.js}"></script>
 
+<script th:inline="javascript">
+
+  document.addEventListener("DOMContentLoaded", function () {
+
+    const barcodeInput   = document.getElementById("barcode");
+    const generateBtn    = document.getElementById("generateBarcodeBtn");
+    const previewWrap     = document.getElementById("barcodePreviewWrap");
+    const printBtn        = document.getElementById("printBarcodeBtn");
+
+    // ── Render barcode preview whenever value changes ──
+    function renderBarcodePreview() {
+
+      const value = barcodeInput.value.trim();
+
+      if (!value) {
+        previewWrap.style.display = "none";
+        return;
+      }
+
+      try {
+
+        JsBarcode("#barcodePreview", value, {
+          format: "CODE128",
+          lineColor: "#000",
+          width: 2,
+          height: 50,
+          displayValue: true,
+          fontSize: 14
+        });
+
+        previewWrap.style.display = "block";
+
+      } catch (e) {
+        previewWrap.style.display = "none";
+      }
+    }
+
+    // ── Generate button click ──
+    generateBtn.addEventListener("click", function () {
+
+      generateBtn.disabled = true;
+      generateBtn.innerHTML =
+          '<i class="bi bi-hourglass-split"></i> ...';
+
+      fetch("/inventory/product/generate-barcode")
+
+        .then(res => {
+
+          if (!res.ok) {
+            throw new Error("Failed to generate barcode");
+          }
+
+          return res.json();
+        })
+
+        .then(data => {
+
+          barcodeInput.value = data.barcode;
+          renderBarcodePreview();
+        })
+
+        .catch(err => {
+
+          alert("বারকোড generate করা যায়নি। আবার চেষ্টা করুন।");
+          console.error(err);
+        })
+
+        .finally(() => {
+
+          generateBtn.disabled = false;
+          generateBtn.innerHTML =
+              '<i class="bi bi-magic"></i> Generate';
+        });
+    });
+
+    // ── Manual typing / scanning triggers preview too ──
+    barcodeInput.addEventListener("input", renderBarcodePreview);
+
+    barcodeInput.addEventListener("keydown", function (e) {
+
+      // Scanner সাধারণত Enter দিয়ে শেষ করে —
+      // ফর্ম accidental submit আটকাতে preventDefault করছি
+      if (e.key === "Enter") {
+
+        e.preventDefault();
+        renderBarcodePreview();
+      }
+    });
+
+    // ── Print label button ──
+    printBtn.addEventListener("click", function () {
+
+      const svgMarkup = document.getElementById("barcodePreview").outerHTML;
+
+      const printWindow = window.open("", "_blank", "width=400,height=300");
+
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Barcode Label</title>
+            <style>
+              body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+              }
+            </style>
+          </head>
+          <body onload="window.print(); window.close();">
+            ${svgMarkup}
+          </body>
+        </html>
+      `);
+
+      printWindow.document.close();
+    });
+
+    // ── On page load, if editing existing product with barcode, show preview ──
+    if (barcodeInput.value.trim()) {
+      renderBarcodePreview();
+    }
+
+  });
+
+</script>
+
 </body>
 </html>
+
+
