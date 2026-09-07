@@ -12,6 +12,7 @@ import com.sbmp.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -19,6 +20,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/inventory/product")
@@ -578,4 +582,84 @@ public class ProductController {
 
         return "redirect:/inventory/product";
     }
+
+    // ─────────────────────────────────────────────────────────────
+    // BARCODE / SKU LOOKUP (Purchase & Sales স্ক্যানের জন্য)
+    // ─────────────────────────────────────────────────────────────
+
+    @GetMapping("/by-code/{code}")
+    @ResponseBody
+    public ResponseEntity<?> findByCode(
+
+            @PathVariable
+            String code,
+
+            @AuthenticationPrincipal
+            UserDetails userDetails
+    ) {
+
+        Business business =
+                getCurrentBusiness(userDetails);
+
+        Optional<Product> productOpt =
+                productService.findByBarcodeOrSku(
+                        code,
+                        business
+                );
+
+        if (productOpt.isEmpty()) {
+
+            Map<String, Object> notFound = new java.util.HashMap<>();
+            notFound.put("found", false);
+            notFound.put("message", "Product not found for this code.");
+
+            return ResponseEntity
+                    .status(404)
+                    .body(notFound);
+        }
+
+        Product product = productOpt.get();
+
+        Map<String, Object> response = new java.util.HashMap<>();
+        response.put("found", true);
+        response.put("id", product.getId());
+        response.put("name", product.getName());
+        response.put("sku", product.getSku() == null ? "" : product.getSku());
+        response.put("barcode", product.getBarcode() == null ? "" : product.getBarcode());
+        response.put("unit", product.getUnit() == null ? "" : product.getUnit());
+        response.put("purchasePrice", product.getPurchasePrice());
+        response.put("sellingPrice", product.getSellingPrice());
+        response.put("lastPurchasePrice", product.getLastPurchasePrice() == null
+                ? product.getPurchasePrice() : product.getLastPurchasePrice());
+        response.put("stockQuantity", product.getStockQuantity());
+        response.put("categoryId", product.getCategory().getId());
+        response.put("categoryName", product.getCategory().getName());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // GENERATE NEW UNIQUE BARCODE (নতুন প্রোডাক্টের জন্য)
+    // ─────────────────────────────────────────────────────────────
+
+    @GetMapping("/generate-barcode")
+    @ResponseBody
+    public ResponseEntity<?> generateBarcode(
+
+            @AuthenticationPrincipal
+            UserDetails userDetails
+    ) {
+
+        Business business =
+                getCurrentBusiness(userDetails);
+
+        String code =
+                productService.generateUniqueBarcode(business);
+
+        return ResponseEntity.ok(
+                Map.of("barcode", code)
+        );
+    }
 }
+
+
