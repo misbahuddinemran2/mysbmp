@@ -309,6 +309,157 @@ function updateWorkflowStep(step, completed) {
 }
 
 /* ============================================================
+   BARCODE SCAN (SALES / POS STYLE)
+   ============================================================ */
+
+function initBarcodeScanInput() {
+  const scanInput = document.getElementById('barcodeScanInput');
+  if (!scanInput) return;
+
+  scanInput.focus();
+
+  scanInput.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+
+    const code = scanInput.value.trim();
+    if (!code) return;
+
+    handleBarcodeScan(code);
+    scanInput.value = '';
+  });
+}
+
+function setScanStatus(message, type) {
+  const statusEl = document.getElementById('barcodeScanStatus');
+  if (!statusEl) return;
+
+  statusEl.textContent = message;
+  statusEl.className = type === 'error'
+    ? 'field-hint text-danger'
+    : type === 'warning'
+      ? 'field-hint text-warning'
+      : 'field-hint text-success';
+
+  setTimeout(() => {
+    statusEl.className = 'field-hint';
+    statusEl.textContent = 'Scanner input focused — scan a product to add it instantly.';
+  }, 2500);
+}
+
+async function handleBarcodeScan(code) {
+
+  // 1) Try local product list first (fast path)
+  let product = State.products.find(p =>
+    (p.barcode && p.barcode === code) ||
+    (p.sku && p.sku === code)
+  );
+
+  // 2) Fallback to server lookup
+  if (!product) {
+    try {
+      const response = await fetch(`/inventory/product/by-code/${encodeURIComponent(code)}`);
+
+      if (!response.ok) {
+        setScanStatus(`Product not found for code: ${code}`, 'error');
+        showToast('error', 'Not Found', `No product matches code: ${code}`);
+        return;
+      }
+
+      const data = await response.json();
+
+      product = {
+        id: data.id,
+        name: data.name,
+        price: data.sellingPrice || 0,
+        stock: data.stockQuantity || 0,
+        unit: data.unit || '',
+        barcode: data.barcode || '',
+        sku: data.sku || ''
+      };
+
+      State.products.push(product);
+
+    } catch (error) {
+      console.error(error);
+      setScanStatus('Lookup failed. Check connection and try again.', 'error');
+      showToast('error', 'Lookup Failed', 'Could not reach server.');
+      return;
+    }
+  }
+
+  // 3) Stock guard — do not allow adding an out-of-stock item
+  if (!product.stock || product.stock <= 0) {
+    setScanStatus(`Out of stock: ${product.name}`, 'error');
+    showToast('error', 'Out of Stock', `${product.name} has no available stock.`);
+    return;
+  }
+
+  addOrIncrementScannedProduct(product);
+  setScanStatus(`Added: ${product.name}`, 'success');
+}
+
+function addOrIncrementScannedProduct(product) {
+
+  // If product already exists as a row, just increment quantity (respecting stock limit)
+  const existingRow = $$('.item-row').find(row => {
+    const hidden = row.querySelector('.product-id-hidden');
+    return hidden && hidden.value === String(product.id);
+  });
+
+  if (existingRow) {
+    const idx = existingRow.dataset.idx;
+    const qtyInput = document.getElementById(`qty-${idx}`);
+
+    if (qtyInput) {
+      const nextQty = (parseFloat(qtyInput.value) || 0) + 1;
+
+      if (nextQty > product.stock) {
+        showToast('warning', 'Stock Limit', `Only ${product.stock} unit(s) of ${product.name} available.`);
+        qtyInput.value = product.stock;
+      } else {
+        qtyInput.value = nextQty;
+      }
+
+      calcRowTotal(idx);
+    }
+    return;
+  }
+
+  // Otherwise add a brand-new row and select this product in it
+  addProductRow();
+
+  const newIdx = State.itemRowCount - 1;
+  const newRow = document.querySelector(`.item-row[data-idx="${newIdx}"]`);
+  if (!newRow) return;
+
+  const productSelect = newRow.querySelector('.item-product-select');
+
+  if (productSelect) {
+
+    let optionExists = [...productSelect.options].some(o => o.value === String(product.id));
+
+    if (!optionExists) {
+      const option = document.createElement('option');
+      option.value = product.id;
+      option.text = product.name;
+      option.setAttribute('data-price', product.price);
+      option.setAttribute('data-stock', product.stock);
+      productSelect.appendChild(option);
+    }
+
+    productSelect.value = product.id;
+    onProductChange(productSelect, newIdx);
+  }
+
+  const qtyInput = document.getElementById(`qty-${newIdx}`);
+  if (qtyInput) {
+    qtyInput.value = "1";
+    calcRowTotal(newIdx);
+  }
+}
+
+/* ============================================================
    PRODUCT ROW MANAGEMENT
    ============================================================ */
 function addProductRow() {
@@ -415,6 +566,12 @@ function onProductChange(selectEl, idx) {
     }
   }
 
+  // Clamp quantity to available stock immediately when product changes
+  const qtyInput = document.getElementById(`qty-${idx}`);
+  if (qtyInput && stock > 0 && numVal(qtyInput) > stock) {
+    qtyInput.value = stock;
+  }
+
   calcRowTotal(idx);
 }
 
@@ -427,6 +584,16 @@ function calcRowTotal(idx) {
 
   const lineTotalEl = document.getElementById(`lineTotal-${idx}`);
   if (lineTotalEl) lineTotalEl.textContent = fmtMoney(lineTotal);
+
+  // Soft stock-limit warning while typing quantity manually
+  const row = document.querySelector(`.item-row[data-idx="${idx}"]`);
+  const select = row?.querySelector('.item-product-select');
+  const opt = select?.options[select.selectedIndex];
+  const stock = parseFloat(opt?.dataset.stock || 0);
+
+  if (opt?.value && stock > 0 && qty > stock) {
+    showToast('warning', 'Stock Limit', `Only ${stock} unit(s) available for this product.`);
+  }
 
   recalcSummary();
 }
@@ -579,22 +746,36 @@ function validateForm() {
     errors.push('Please add at least one product.');
   }
 
-  // 4. Each item must have product and qty > 0
+  // 4. Each item must have product and qty > 0, and qty must not exceed available stock
   rows.forEach((row, i) => {
     const idx = row.dataset.idx;
     const productSel = row.querySelector('.item-product-select');
     const qtyInput   = document.getElementById(`qty-${idx}`);
+
     if (!productSel?.value) {
       errors.push(`Row ${i + 1}: Please select a product.`);
       productSel?.classList.add('is-invalid');
     } else {
       productSel?.classList.remove('is-invalid');
     }
+
     if (numVal(qtyInput) <= 0) {
       errors.push(`Row ${i + 1}: Quantity must be greater than 0.`);
       qtyInput?.classList.add('is-invalid');
     } else {
       qtyInput?.classList.remove('is-invalid');
+    }
+
+    // Stock guard at submit time too
+    const opt = productSel?.options[productSel.selectedIndex];
+    const stock = parseFloat(opt?.dataset.stock || 0);
+
+    if (productSel?.value && stock <= 0) {
+      errors.push(`Row ${i + 1}: This product is out of stock.`);
+      qtyInput?.classList.add('is-invalid');
+    } else if (productSel?.value && numVal(qtyInput) > stock) {
+      errors.push(`Row ${i + 1}: Only ${stock} unit(s) available.`);
+      qtyInput?.classList.add('is-invalid');
     }
   });
 
@@ -731,6 +912,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAdvancePaidInput();
   initStepperNav();
   setDefaultDate();
+  initBarcodeScanInput();
 
   // Mark step 1 active
   const firstStep = document.querySelector('.workflow-step[data-step="1"]');
