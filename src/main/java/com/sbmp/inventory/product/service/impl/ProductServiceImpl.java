@@ -29,6 +29,54 @@ public class ProductServiceImpl
     private final ProductRepository productRepository;
     private final StockRepository stockRepository;
 
+
+
+    @Override
+    public Optional<Product> findByBarcodeOrSku(String code, Business business) {
+
+        if (code == null || code.isBlank()) {
+            return Optional.empty();
+        }
+
+        return productRepository
+                .findByBarcodeOrSkuAndBusiness(code.trim(), business);
+    }
+
+    @Override
+    public String generateUniqueBarcode(Business business) {
+
+        String code;
+
+        do {
+            // 12-digit numeric body + 1 checksum digit = 13-digit EAN-13 style barcode
+            long timePart = System.currentTimeMillis() % 100_000_000_000L; // 11 digits max
+
+            String body =
+                    "2" + String.format("%011d", timePart); // "2" + 11 digits = 12 digits
+
+            code = body + calculateEAN13CheckDigit(body);   // 12 + 1 = 13 digits
+
+        } while (productRepository
+                .existsByBarcodeAndBusiness(code, business));
+
+        return code;
+    }
+
+    // EAN-13 checksum ক্যালকুলেশন হেল্পার
+    private String calculateEAN13CheckDigit(String code12) {
+
+        int sum = 0;
+
+        for (int i = 0; i < 12; i++) {
+            int digit = Character.getNumericValue(code12.charAt(i));
+            sum += (i % 2 == 0) ? digit : digit * 3;
+        }
+
+        int checkDigit = (10 - (sum % 10)) % 10;
+
+        return String.valueOf(checkDigit);
+    }
+
     // ─────────────────────────────────────────────────────────────
     // CRUD
     // ─────────────────────────────────────────────────────────────
