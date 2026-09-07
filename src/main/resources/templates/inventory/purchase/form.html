@@ -149,6 +149,28 @@
                     </button>
                 </div>
 
+                <!-- ── BARCODE SCAN BAR ─────────────────────────────── -->
+                <div class="erp-card__body pt-0 pb-3">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold mb-1" style="font-size:.8125rem;">
+                                <i class="bi bi-upc-scan me-1"></i>
+                                Scan Barcode / SKU
+                            </label>
+                            <input type="text"
+                                   id="barcode-scan-input"
+                                   class="form-control erp-input"
+                                   placeholder="Scan product barcode here and press Enter..."
+                                   autocomplete="off"
+                                   autofocus>
+                            <div class="form-text" id="barcode-scan-status">
+                                Scanner input focused — scan a product to add it instantly.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ─────────────────────────────────────────────────── -->
+
                 <div class="erp-card__body p-0">
                     <div class="table-responsive">
                         <table class="table align-middle mb-0 erp-table purchase-table" id="purchase-table">
@@ -361,4 +383,3 @@
 <script th:src="@{/js/add_purchase.js}"></script>
 </body>
 </html>
-
