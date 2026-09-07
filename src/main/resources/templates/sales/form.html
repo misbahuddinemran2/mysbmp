@@ -31,14 +31,16 @@
 
         <script th:inline="javascript">
             /*<![CDATA[*/
-            const PRODUCT_DATA = [
+                 const PRODUCT_DATA = [
                 /*[# th:each="p : ${products}"]*/
                 {
-                    id:    /*[[${p.id}]]*/ 0,
-                    name:  /*[[${p.name}]]*/ '',
-                    price: /*[[${p.sellingPrice}]]*/ 0,
-                    stock: /*[[${p.stockQuantity}]]*/ 0,
-                    unit:  /*[[${p.unit}]]*/ ''
+                    id:      /*[[${p.id}]]*/ 0,
+                    name:    /*[[${p.name}]]*/ '',
+                    price:   /*[[${p.sellingPrice}]]*/ 0,
+                    stock:   /*[[${p.stockQuantity}]]*/ 0,
+                    unit:    /*[[${p.unit}]]*/ '',
+                    barcode: /*[[${p.barcode}]]*/ '',
+                    sku:     /*[[${p.sku}]]*/ ''
                 },
                 /*[/]*/
             ];
@@ -255,6 +257,25 @@
                                     Add Product
                                 </button>
                             </div>
+
+                            <!-- ── BARCODE SCAN BAR ─────────────────────────────── -->
+                            <div class="erp-card-body" style="padding:12px 20px 16px;border-bottom:1px solid var(--border);">
+                                <label class="form-label-erp">
+                                    <i class="bi bi-upc-scan me-1"></i>
+                                    Scan Barcode / SKU
+                                </label>
+                                <input type="text"
+                                       id="barcodeScanInput"
+                                       class="form-control-erp"
+                                       placeholder="Scan product barcode here and press Enter..."
+                                       autocomplete="off"
+                                       autofocus/>
+                                <div class="field-hint" id="barcodeScanStatus">
+                                    Scanner input focused — scan a product to add it instantly.
+                                </div>
+                            </div>
+                            <!-- ─────────────────────────────────────────────────── -->
+
                             <div class="erp-card-body" style="padding:0">
                                 <div class="items-table-wrapper" style="border:none;border-radius:0">
                                     <table class="items-table">
