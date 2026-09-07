@@ -32,12 +32,15 @@ document.addEventListener('DOMContentLoaded', () => {
             name: p.name,
             categoryId: p.category?.id || null,
             stockQuantity: p.stockQuantity || 0,
-            purchasePrice: p.purchasePrice || 0
+            purchasePrice: p.purchasePrice || 0,
+            barcode: p.barcode || '',
+            sku: p.sku || ''
         }));
     }
 
     initializeSupplierCardTrigger();
     initializeCategoryCardTrigger();
+    initializeBarcodeScanInput();
 
     addPurchaseRow();
     addPaymentRow();
@@ -53,6 +56,209 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 });
+
+
+/* =========================================================
+   BARCODE SCAN INPUT
+========================================================= */
+function initializeBarcodeScanInput() {
+
+    const scanInput =
+        document.getElementById('barcode-scan-input');
+
+    if (!scanInput) return;
+
+    // Keep focus on scan input by default so USB scanners work immediately
+    scanInput.focus();
+
+    scanInput.addEventListener('keydown', e => {
+
+        if (e.key !== 'Enter') return;
+
+        e.preventDefault();
+
+        const code = scanInput.value.trim();
+
+        if (!code) return;
+
+        handleBarcodeScan(code);
+
+        scanInput.value = '';
+    });
+}
+
+
+function setScanStatus(message, isError) {
+
+    const statusEl =
+        document.getElementById('barcode-scan-status');
+
+    if (!statusEl) return;
+
+    statusEl.innerText = message;
+
+    statusEl.className =
+        isError
+            ? 'form-text text-danger'
+            : 'form-text text-success';
+
+    setTimeout(() => {
+
+        statusEl.className = 'form-text';
+
+        statusEl.innerText =
+            'Scanner input focused — scan a product to add it instantly.';
+
+    }, 2500);
+}
+
+
+async function handleBarcodeScan(code) {
+
+    // 1) Try to find locally first (fast path)
+    let product =
+        globalProducts.find(p =>
+            (p.barcode && p.barcode === code) ||
+            (p.sku && p.sku === code)
+        );
+
+    // 2) Fallback: fetch from server (covers products not yet in initial list)
+    if (!product) {
+
+        try {
+
+            const response =
+                await fetch(`/inventory/product/by-code/${encodeURIComponent(code)}`);
+
+            if (!response.ok) {
+
+                setScanStatus(
+                    `Product not found for code: ${code}`,
+                    true
+                );
+
+                return;
+            }
+
+            const data = await response.json();
+
+            product = {
+                id: data.id,
+                name: data.name,
+                categoryId: data.categoryId,
+                stockQuantity: data.stockQuantity || 0,
+                purchasePrice: data.lastPurchasePrice || data.purchasePrice || 0,
+                barcode: data.barcode || '',
+                sku: data.sku || ''
+            };
+
+            // cache it for subsequent scans in this session
+            globalProducts.push(product);
+
+        } catch (error) {
+
+            console.error(error);
+
+            setScanStatus(
+                'Lookup failed. Check connection and try again.',
+                true
+            );
+
+            return;
+        }
+    }
+
+    addScannedProductRow(product);
+
+    setScanStatus(
+        `Added: ${product.name}`,
+        false
+    );
+}
+
+
+function addScannedProductRow(product) {
+
+    // If this product already has a row, just bump quantity by 1
+    const existingRow =
+        [...document.querySelectorAll('.row-product-select')]
+            .find(sel => sel.value === String(product.id));
+
+    if (existingRow) {
+
+        const index =
+            existingRow.getAttribute('data-row-index');
+
+        const qtyInput =
+            document.getElementById(`qty-input-${index}`);
+
+        if (qtyInput) {
+
+            qtyInput.value =
+                (parseFloat(qtyInput.value) || 0) + 1;
+
+            calculateRowTotal(index);
+        }
+
+        return;
+    }
+
+    // Otherwise create a brand-new row and populate it
+    addPurchaseRow();
+
+    const newIndex = purchaseItemCount - 1;
+
+    const catSelect =
+        document.getElementById(`cat-select-${newIndex}`);
+
+    if (catSelect && product.categoryId) {
+
+        catSelect.value = product.categoryId;
+        onRowCategoryChange(newIndex);
+    }
+
+    const productSelect =
+        document.getElementById(`prod-select-${newIndex}`);
+
+    if (productSelect) {
+
+        // Make sure the option exists in the (possibly filtered) dropdown
+        let optionExists =
+            [...productSelect.options]
+                .some(o => o.value === String(product.id));
+
+        if (!optionExists) {
+
+            const option =
+                document.createElement('option');
+
+            option.value = product.id;
+            option.text = product.name;
+
+            option.setAttribute('data-category-id', product.categoryId);
+            option.setAttribute('data-stock', product.stockQuantity);
+            option.setAttribute('data-price', product.purchasePrice);
+
+            productSelect.insertBefore(
+                option,
+                productSelect.lastElementChild
+            );
+        }
+
+        productSelect.value = product.id;
+
+        onRowProductChange(newIndex);
+    }
+
+    const qtyInput =
+        document.getElementById(`qty-input-${newIndex}`);
+
+    if (qtyInput) {
+
+        qtyInput.value = "1";
+        calculateRowTotal(newIndex);
+    }
+}
 
 
 /* =========================================================
@@ -271,7 +477,7 @@ function addPurchaseRow() {
         'hover:bg-slate-50/80 transition-colors animate-fadeIn duration-200 relative group';
 
     tr.innerHTML = `
-    
+
         <td class="py-2 px-4 border border-slate-100">
 
              <select id="cat-select-${index}"
@@ -1164,7 +1370,9 @@ async function saveProductModal() {
             name: data.name,
             categoryId: data.categoryId,
             stockQuantity: 0,
-            purchasePrice: 0
+            purchasePrice: 0,
+            barcode: data.barcode || '',
+            sku: data.sku || ''
         });
 
         filterAllProductDropdowns();
