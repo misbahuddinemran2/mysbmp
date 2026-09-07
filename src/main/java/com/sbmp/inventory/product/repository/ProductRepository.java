@@ -187,4 +187,26 @@ public interface ProductRepository
             Business business,
             Integer stock
     );
+
+    // ─────────────────────────────────────────────────────────────
+    // BARCODE OR SKU LOOKUP (Purchase / Sales স্ক্যানের জন্য)
+    // ─────────────────────────────────────────────────────────────
+
+    @Query("""
+            SELECT p
+            FROM Product p
+            WHERE p.business = :business
+            AND (
+                    p.barcode = :code
+                    OR p.sku = :code
+                )
+            """)
+    Optional<Product> findByBarcodeOrSkuAndBusiness(
+
+            @Param("code")
+            String code,
+
+            @Param("business")
+            Business business
+    );
 }
