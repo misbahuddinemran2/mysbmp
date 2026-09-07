@@ -101,4 +101,7 @@ public interface ProductService {
     long countActive(Business business);
 
     long countLowStock(Business business);
+    Optional<Product> findByBarcodeOrSku(String code, Business business);
+
+    String generateUniqueBarcode(Business business);
 }
